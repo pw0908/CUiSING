@@ -1,4 +1,4 @@
-CC=g++-9 -std=c++17
+CC=g++ -std=c++0x
 DIR_INC=
 CFLAGS=-Wall -g -O3 $(DIR_INC)
 DIR_SRC= src
@@ -6,7 +6,7 @@ CPP_FILES=$(wildcard ${DIR_SRC}/*.cpp) $(wildcard ${DIR_SRC}/*/*.cpp) $(wildcard
 SRC=$(CPP_FILES)
 OBJ=$(SRC:.cpp=.o)
 
-TARGET= ./Ising
+TARGET= Ising
 
 defaut: $(TARGET)
 	-rm $(OBJ)
