@@ -28,7 +28,9 @@ private:
 
     /* Observables */
     double *E;
-    double *m;
+    double *M;
+    double m;
+    double e;
 
 
 public:
