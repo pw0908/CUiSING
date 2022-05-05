@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     int n = 50;
     double J = 1.0;
     double h = 0.0;
+    Ising ising;
     
     if (argc > 4)
     {
@@ -18,26 +19,30 @@ int main(int argc, char *argv[])
         n = atof(argv[2]);
         J = atof(argv[3]);
         h = atof(argv[4]);
-        Ising ising = Ising(n_iters,n,J,h);
+        ising = Ising(n_iters,n,J,h);
     }
     else if (argc > 3)
     {
         n_iters = atof(argv[1]);
         n = atof(argv[2]);
         J = atof(argv[3]);
-        Ising ising = Ising(n_iters,n,J);
+        ising = Ising(n_iters,n,J);
 
     }
     else if (argc > 2)
     {
         n_iters = atof(argv[1]);
         n = atof(argv[2]);
-        Ising ising = Ising(n_iters,n);
+        ising = Ising(n_iters,n);
     }
     else if (argc > 1)
     {
         n_iters = atof(argv[1]);
-        Ising ising = Ising(n_iters);
+        ising = Ising(n_iters);
+    }
+    else
+    {
+        ising = Ising();
     }
 
     cout << "=========================" << endl;
@@ -49,6 +54,18 @@ int main(int argc, char *argv[])
 
     // Initialize timers
     Timers MainTimer;
+
+    START_CPU_TIMER(MainTimer);
+
+    ising.monteCarlo();
+
+    STOP_CPU_TIMER(MainTimer);
+
+    int number1 = MainTimer.duration;
+    std::stringstream ss1;
+    ss1 << number1;
+
+    std::cout << "\nTotal Program Time : " << MainTimer.duration << " seconds" << std::endl;
     
     return 0;
 }
