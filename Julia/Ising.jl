@@ -1,5 +1,4 @@
-using LinearAlgebra, PyCall
-import PyPlot; const plt=PyPlot
+using LinearAlgebra, Test
 
 # Set x and y dim (n), and number of spins n^2
 n = 10; N = 1;
@@ -29,7 +28,7 @@ end
 (row,col,val) = findmat(!iszero,A);
 pos = hcat(row, col, val);
 
-function diff_neigh(xy, A, n)
+function diff_neigh(xy::Array, A::Array, n::Int)
     return  -sum( hcat(A[mod.(xy[:, 1] .- 2, n) .+ 1 + n * (xy[:, 2] .- 1)],
         A[mod.(xy[:, 1], n) .+ 1 + n * (xy[:, 2] .- 1)],
         A[xy[:, 1] + n * mod.(xy[:, 2] .- 2, n)],
@@ -59,5 +58,5 @@ for i ∈ 2:n_iters + 1
     Es[i] = J * dot(pos[:, 3], diff_neigh(pos, A, n))/2;
 end
 
-plt.plot(Es)
-plt.savefig("trial.pdf")
+# plt.plot(Es)
+# plt.savefig("trial.pdf")
