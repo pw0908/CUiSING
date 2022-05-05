@@ -20,6 +20,7 @@ private:
     int dim = 2;
     int **A;
     int **points;
+    float **R;
 
     /* Iteration Parameters */
     int n_iters;
@@ -29,8 +30,7 @@ private:
     /* Observables */
     double *E;
     double *M;
-    double m;
-    double e;
+    double dE;
 
 
 public:
@@ -52,10 +52,12 @@ public:
 
     /* Calculations */
     void calcHamiltonian();
+    void calcDeltaHamiltonian(int i, int j);
     void calcMagnetization();
 
     /* Helper */
     void getPoints();
+    void getRandom();
 
     /* Data I/O */
     void openLog();
