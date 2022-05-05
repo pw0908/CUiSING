@@ -19,7 +19,6 @@ private:
     double h;
     int dim = 2;
     int **A;
-    int **points;
     float **R;
 
     /* Iteration Parameters */
@@ -35,15 +34,13 @@ private:
 
 public:
     /* Default constructor/destructor*/
-    Ising();
     ~Ising();
 
     /* Constructor */
-    Ising(int n_ = 50,
+    Ising(int n_iters_ = 1000,
+          int n_ = 50,
           double J_ = 1.0,
-          double h_ = 0.0,
-          int n_iters_ = 1000,
-          int sample_freq_ = 10);
+          double h_ = 0.0);
 
     /* Main engine */
     void initializeSystem();

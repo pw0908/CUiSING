@@ -6,57 +6,49 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    /* Initialize ising object */
-    Ising ising;
-
     // Parse input arguments
-    int n;
-    double J;
-    double h;
-
-    if (argc > 3)
+    int n_iters = 1000;
+    int n = 50;
+    double J = 1.0;
+    double h = 0.0;
+    
+    if (argc > 4)
     {
-        n = atof(argv[1]);
-        J = atof(argv[2]);
-        h = atof(argv[3]);
-        cout << "===============" << endl;
-        cout << "n:  " << n       << endl;
-        cout << "J:  " << J       << endl;
-        cout << "h:  " << h       << endl;
-        cout << "===============" << endl;
-        ising = Ising(n,J,h);
+        n_iters = atof(argv[1]);
+        n = atof(argv[2]);
+        J = atof(argv[3]);
+        h = atof(argv[4]);
+        Ising ising = Ising(n_iters,n,J,h);
+    }
+    else if (argc > 3)
+    {
+        n_iters = atof(argv[1]);
+        n = atof(argv[2]);
+        J = atof(argv[3]);
+        Ising ising = Ising(n_iters,n,J);
+
     }
     else if (argc > 2)
     {
-        n = atof(argv[1]);
-        J = atof(argv[2]);
-        cout << "==============="   << endl;
-        cout << "n:  " << n         << endl;
-        cout << "J:  " << J         << endl;
-        cout << "h:  " << "default" << endl;
-        cout << "==============="   << endl;
-
+        n_iters = atof(argv[1]);
+        n = atof(argv[2]);
+        Ising ising = Ising(n_iters,n);
     }
     else if (argc > 1)
     {
-        n = atof(argv[1]);
-        cout << "==============="   << endl;
-        cout << "n:  " << n         << endl;
-        cout << "J:  " << "default" << endl;
-        cout << "h:  " << "default" << endl;
-        cout << "==============="   << endl;
+        n_iters = atof(argv[1]);
+        Ising ising = Ising(n_iters);
     }
-    else
-    {
-        cout << "==================================" << endl;
-        cout << "Using default system parameters"    << endl;
-        cout << "==================================" << endl;
-    }
+
+    cout << "=========================" << endl;
+    cout << "n_iters:   " << n_iters    << endl;
+    cout << "n:         " << n          << endl;
+    cout << "J:         " << J          << endl;
+    cout << "h:         " << h          << endl;
+    cout << "=========================" << endl;
 
     // Initialize timers
     Timers MainTimer;
     
-
-
     return 0;
 }
