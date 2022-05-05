@@ -1,25 +1,31 @@
 #include "Ising.h"
 
 /* Default destructor */
-Ising::~Ising()
+Ising::~Ising(){}
+
+Ising::Ising()
 {
-    delete[] E;
-    delete[] M;
+    n_iters = 1000;
+    n = 50;
+    J = 1.0;
+    h = 0.0;
+    
+    E.resize(n_iters+1);
+    M.resize(n_iters+1);
+
+    iter = 0;
 }
 
 /* Constructor */
-Ising::Ising(int n_iters_ = 1000,
-             int n_ = 50,
-             double J_ = 1.0,
-             double h_ = 0.0)
+Ising::Ising(int n_iters_, int n_, double J_, double h_)
 {
     n = n_;
     J = J_;
     h = h_;
     n_iters = n_iters_;
 
-    E = new double[n_iters+1];
-    M = new double[n_iters+1];
+    E.resize(n_iters+1);
+    M.resize(n_iters+1);
 
     iter = 0;
 }
@@ -49,6 +55,11 @@ void Ising::monteCarlo()
         calcHamiltonian();
         calcMagnetization();
     }
+
+    std::cout << "E = " << E[iter] << std::endl;
+    std::cout << "M = " << M[iter] << std::endl;
+
+    finalizeSystem();
 }
 
 void Ising::initializeSystem()
@@ -64,6 +75,7 @@ void Ising::initializeSystem()
         R[i] = new float[n];
     }
 
+    srand(time(NULL));
     /* Initialize spins on lattice */
     for (int i = 0; i < n; i++)
     {
@@ -75,4 +87,15 @@ void Ising::initializeSystem()
 
     calcHamiltonian();
     calcMagnetization();
+}
+
+void Ising::finalizeSystem()
+{
+
+    for (int i = 0; i < n; i++)
+    {
+        delete[] A[i];
+        delete[] R[i];
+    }
+
 }

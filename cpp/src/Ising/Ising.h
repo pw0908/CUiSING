@@ -27,20 +27,23 @@ private:
     int iter;
 
     /* Observables */
-    double *E;
-    double *M;
+    std::vector<double> E;
+    std::vector<double> M;
     double dE;
 
 
 public:
-    /* Default constructor/destructor*/
-    ~Ising();
+    /* Default constructor */
+    Ising();
 
     /* Constructor */
-    Ising(int n_iters_ = 1000,
-          int n_ = 50,
-          double J_ = 1.0,
-          double h_ = 0.0);
+    Ising(int n_iters_,
+          int n_,
+          double J_,
+          double h_);
+
+    /* destructor */
+    ~Ising();
 
     /* Main engine */
     void initializeSystem();

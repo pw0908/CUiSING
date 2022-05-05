@@ -21,24 +21,10 @@ int main(int argc, char *argv[])
         h = atof(argv[4]);
         ising = Ising(n_iters,n,J,h);
     }
-    else if (argc > 3)
-    {
-        n_iters = atof(argv[1]);
-        n = atof(argv[2]);
-        J = atof(argv[3]);
-        ising = Ising(n_iters,n,J);
-
-    }
-    else if (argc > 2)
-    {
-        n_iters = atof(argv[1]);
-        n = atof(argv[2]);
-        ising = Ising(n_iters,n);
-    }
     else if (argc > 1)
     {
-        n_iters = atof(argv[1]);
-        ising = Ising(n_iters);
+        std::cerr << "Need to supply 4 arguments (or none): int n_iters, int n, double J, double h" << std::endl;
+        std::exit(0);
     }
     else
     {
