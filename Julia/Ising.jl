@@ -52,4 +52,5 @@ function MCIsing(n,J,h,n_iters;sample_freq=20)
         ms[i] = sum(A) / N;
         Es[i] = J * dot(pos[:, 3], diff_neigh(pos, A, n))/2;
     end
+    return ms, Es
 end
