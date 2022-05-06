@@ -62,6 +62,8 @@ int main(int argc, char *argv[])
 
     STOP_CPU_TIMER(MainTimer);
 
+    ising.writeOutput();
+
     int number1 = MainTimer.duration;
     std::stringstream ss1;
     ss1 << number1;

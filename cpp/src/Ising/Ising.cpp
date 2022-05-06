@@ -10,11 +10,14 @@ Ising::Ising()
     n = 50;
     J = 1.0;
     h = 0.0;
+    sample_freq = 10;
     
     E.resize(n_iters+1);
     M.resize(n_iters+1);
 
     iter = 0;
+
+    setOutputFileStructure();
 }
 
 /* Constructor */
@@ -25,11 +28,14 @@ Ising::Ising(int n_iters_, int d_, int n_, double J_, double h_)
     n = n_;
     J = J_;
     h = h_;
+    sample_freq = 10;
     
     E.resize(n_iters+1);
     M.resize(n_iters+1);
 
     iter = 0;
+
+    setOutputFileStructure();
 }
 
 void Ising::monteCarlo2d()
@@ -57,9 +63,10 @@ void Ising::monteCarlo2d()
         calcMagnetization2d();
     }
 
-    std::cout << "E = " << E[iter] << std::endl;
-    std::cout << "M = " << M[iter] << std::endl;
+    // std::cout << "E = " << E[iter] << std::endl;
+    // std::cout << "M = " << M[iter] << std::endl;
 
+    // writeOutput();
     finalizeSystem2d();
 }
 
@@ -92,9 +99,10 @@ void Ising::monteCarlo3d()
         calcMagnetization3d();
     }
 
-    std::cout << "E = " << E[iter] << std::endl;
-    std::cout << "M = " << M[iter] << std::endl;
+    // std::cout << "E = " << E[iter] << std::endl;
+    // std::cout << "M = " << M[iter] << std::endl;
 
+    // writeOutput();
     finalizeSystem3d();
 }
 

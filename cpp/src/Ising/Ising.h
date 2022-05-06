@@ -33,7 +33,23 @@ private:
     std::vector<double> M;
     double dE;
 
+    /*=========================
+     Data I/O
+    =========================*/
+    /* Folder names */
+    std::string outputDir;
+    
+    /* File names */
+    std::string outputFilename;
 
+    /* Actual Files */
+    std::string outputFile;
+
+    /* std::ofstream to do the actual I/O */
+    // std::ofstream &outputStream;
+
+    void setOutputFileStructure();
+    
 public:
     /* Default constructor */
     Ising();
@@ -73,7 +89,7 @@ public:
     /* Data I/O */
     void openLog();
     void writeLog();
-    void writeData();
+    void writeOutput();
     void finalizeIO();
 };
 
