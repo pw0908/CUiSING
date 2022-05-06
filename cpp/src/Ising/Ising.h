@@ -15,11 +15,13 @@ private:
     /* System variables */
     int n;
     int N;
+    int d;
     double J;
     double h;
-    int dim = 2;
-    int **A;
-    float **R;
+    int **A2d;
+    int ***A3d;
+    float **R2d;
+    float ***R3d;
 
     /* Iteration Parameters */
     int n_iters;
@@ -38,6 +40,7 @@ public:
 
     /* Constructor */
     Ising(int n_iters_,
+          int d_,
           int n_,
           double J_,
           double h_);
@@ -46,18 +49,26 @@ public:
     ~Ising();
 
     /* Main engine */
-    void initializeSystem();
-    void monteCarlo();
-    void finalizeSystem();
+    void initializeSystem2d();
+    void monteCarlo2d();
+    void finalizeSystem2d();
+
+    void initializeSystem3d();
+    void monteCarlo3d();
+    void finalizeSystem3d();
 
     /* Calculations */
-    void calcHamiltonian();
-    void calcDeltaHamiltonian(int i, int j);
-    void calcMagnetization();
+    void calcHamiltonian2d();
+    void calcDeltaHamiltonian2d(int i, int j);
+    void calcMagnetization2d();
+
+    void calcHamiltonian3d();
+    void calcDeltaHamiltonian3d(int i, int j, int k);
+    void calcMagnetization3d();
 
     /* Helper */
-    void getPoints();
-    void getRandom();
+    void getRandom2d();
+    void getRandom3d();
 
     /* Data I/O */
     void openLog();

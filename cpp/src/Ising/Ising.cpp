@@ -6,6 +6,7 @@ Ising::~Ising(){}
 Ising::Ising()
 {
     n_iters = 1000;
+    d = 2;
     n = 50;
     J = 1.0;
     h = 0.0;
@@ -17,62 +18,97 @@ Ising::Ising()
 }
 
 /* Constructor */
-Ising::Ising(int n_iters_, int n_, double J_, double h_)
+Ising::Ising(int n_iters_, int d_, int n_, double J_, double h_)
 {
+    n_iters = n_iters_;
+    d = d_;
     n = n_;
     J = J_;
     h = h_;
-    n_iters = n_iters_;
-
+    
     E.resize(n_iters+1);
     M.resize(n_iters+1);
 
     iter = 0;
 }
 
-
-void Ising::monteCarlo()
+void Ising::monteCarlo2d()
 {
-    initializeSystem();
+    initializeSystem2d();
 
     while (iter < n_iters)
     {
-        getRandom();
+        getRandom2d();
 
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < n; j++)
             {
-                calcDeltaHamiltonian(i,j);
-                if (dE <= 0 || R[i][j] <= exp(-1.0*dE))
+                calcDeltaHamiltonian2d(i,j);
+                if (dE <= 0 || R2d[i][j] <= exp(-1.0*dE))
                 {
-                    A[i][j] *= -1;
+                    A2d[i][j] *= -1;
                 }
             }
         }
 
         iter++;
-        calcHamiltonian();
-        calcMagnetization();
+        calcHamiltonian2d();
+        calcMagnetization2d();
     }
 
     std::cout << "E = " << E[iter] << std::endl;
     std::cout << "M = " << M[iter] << std::endl;
 
-    finalizeSystem();
+    finalizeSystem2d();
 }
 
-void Ising::initializeSystem()
+void Ising::monteCarlo3d()
+{
+    initializeSystem3d();
+
+    while (iter < n_iters)
+    {
+        getRandom3d();
+
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                for (int k = 0; k < n; k++)
+                {
+                    calcDeltaHamiltonian3d(i,j,k);
+                    if (dE <= 0 || R3d[i][j][k] <= exp(-1.0*dE))
+                    {
+                        A3d[i][j][k] *= -1;
+                    }
+                }
+                
+            }
+        }
+
+        iter++;
+        calcHamiltonian3d();
+        calcMagnetization3d();
+    }
+
+    std::cout << "E = " << E[iter] << std::endl;
+    std::cout << "M = " << M[iter] << std::endl;
+
+    finalizeSystem3d();
+}
+
+void Ising::initializeSystem2d()
 {
     N = n*n;
 
-    A = new int *[n];
-    R = new float *[n];
+    A2d = new int *[n];
+    R2d = new float *[n];
 
     for (int i = 0; i < n; i++)
     {
-        A[i] = new int[n];
-        R[i] = new float[n];
+        A2d[i] = new int[n];
+        R2d[i] = new float[n];
     }
 
     srand(time(NULL));
@@ -81,21 +117,77 @@ void Ising::initializeSystem()
     {
         for (int j = 0; j < n; j++)
         {
-            A[i][j] = std::rand()%2 * 2 - 1;
+            A2d[i][j] = std::rand()%2 * 2 - 1;
         }
     }
 
-    calcHamiltonian();
-    calcMagnetization();
+    calcHamiltonian2d();
+    calcMagnetization2d();
 }
 
-void Ising::finalizeSystem()
+void Ising::initializeSystem3d()
+{
+    N = n*n*n;
+
+    A3d = new int **[n];
+    R3d = new float **[n];
+
+    for (int i = 0; i < n; i++)
+    {
+        A3d[i] = new int*[n];
+        R3d[i] = new float*[n];
+
+        for (int j = 0; j < n; j++)
+        {
+            A3d[i][j] = new int[n];
+            R3d[i][j] = new float[n];
+        }
+    }
+
+    srand(time(NULL));
+    /* Initialize spins on lattice */
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            for (int k = 0; k < n; k++)
+            {
+                A3d[i][j][k] = std::rand()%2 * 2 - 1;
+            }
+        }
+    }
+
+    calcHamiltonian3d();
+    calcMagnetization3d();
+}
+
+void Ising::finalizeSystem2d()
 {
 
     for (int i = 0; i < n; i++)
     {
-        delete[] A[i];
-        delete[] R[i];
+        delete[] A2d[i];
+        delete[] R2d[i];
     }
 
+    delete[] A2d;
+    delete[] R2d;
+
+}
+
+void Ising::finalizeSystem3d()
+{
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            delete[] A3d[i][j];
+            delete[] R3d[i][j];
+        }
+        delete[] A3d[i];
+        delete[] R3d[i];
+    }
+    delete[] A3d;
+    delete[] R3d;
 }
