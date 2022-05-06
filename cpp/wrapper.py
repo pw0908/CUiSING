@@ -1,13 +1,15 @@
-import os
-import numpy as np
-import subprocess
+# Import modules
 import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
+import subprocess
+import os
 
+# Set figure parameters
 WIDTH = 1.5 * 8.3 / 2.54
 DOUBLE_WIDTH = 1.5 * 17.1 / 2.54
-DPI = 500
-format='eps'
+DPI = 350
+format='png'
 matplotlib.rcParams.update(
     {
         'axes.labelsize': 14,
@@ -20,31 +22,46 @@ matplotlib.rcParams.update(
         'figure.facecolor': 'white',
         'font.size': 12,
         'grid.color': '0',
-        'grid.linestyle': (0, (1, 5)),
+        'grid.linestyle': '-',
         'legend.edgecolor': '1',
         'legend.fontsize': 12,
         'xtick.labelsize': 12,
         'ytick.labelsize': 12,
         'font.family': "DeJavu Serif",
         'font.serif': ["Computer Modern Roman"],
-        'text.usetex': True,
-        'text.latex.preamble': r'\usepackage{amsmath}'
+        'mathtext.fontset': 'cm',
+        'mathtext.rm': 'serif',
+        'text.usetex': False
     }
 )
 
-n_iters = 10000
-d = 2
-n = 100
-J = .5
-h = 0.0
-outputFile = "output/output.dat"
+# Set system parameters
+n_iters = 10000 # Number of MC iterations
+d = 2           # Number of dimensions
+n = 100         # Number of cells per dimension
+J = .5          # Interaction strength
+h = 0.0         # Magnetic field strength
 
+# Setup output file structure
+outputFile = "output/output.dat"
+delim = '_'
+figureRoot = 'figures/'
+identifier = 'Sys_' + str(n_iters) + delim + str(d) + delim + str(n) + delim + str(J) + delim + str(h)
+figurePath = figureRoot+identifier
+
+if not (os.path.exists(figureRoot)):
+    os.mkdir(figureRoot)
+    os.mkdir(figurePath)
+elif not (os.path.exists(figurePath)):
+    os.mkdir(figurePath)
+
+# Run ising process, with input arguments
 subprocess.run(["./Ising",str(n_iters), str(d), str(n), str(J), str(h)])
 
+# Read in the output data
 iter = []
 E = []
 M = []
-
 with open(outputFile,'rb') as f:
     for line in f:
         line = line.split()
@@ -52,9 +69,22 @@ with open(outputFile,'rb') as f:
         E += [float(line[1])]
         M += [float(line[2])]
 
-plt.figure(1)
-
+# Plot and save the energy trajectory
+plt.figure(1,tight_layout=True)
 plt.plot(iter,E,'.k')
-plt.xlabel(r'')
+plt.xlabel(r'$i$')
+plt.ylabel(r'$E$')
+plt.title(r'$E$  Trajectory')
+plt.savefig(figurePath+'/E_vs_i.png')
+
+# Plot and save the magnetization trajectory
+plt.figure(2,tight_layout=True)
+plt.plot(iter,M,'.k')
+plt.xlabel(r'$i$')
+plt.ylabel(r'$M$')
+plt.title(r'$M$  Trajectory')
+plt.savefig(figurePath+'/M_vs_i.png')
+
+
 
 
