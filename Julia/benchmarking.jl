@@ -30,11 +30,11 @@ figurePath = "/figures"
 
 
 include("Ising.jl")
-n = 100;
+n = 21;
 J = 0.5; n_iters = 10^4; sample_freq = 20; h=0;
 iter = 1:n_iters+1
 
-M, E = @time MCIsing2d(n, J, h, n_iters)
+M, E = @time MCIsing3d(n, J, h, n_iters)
 
 # Plot and save the energy trajectory
 
