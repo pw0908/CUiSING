@@ -5,36 +5,36 @@ DOUBLE_WIDTH = 1.5 * 17.1 / 2.54
 DPI = 350
 format="png"
 
-rcParams = PyDict(matplotlib["rcParams"])
-rcParams["axes.labelsize"] = 14
-rcParams["axes.xmargin"] = 0
-rcParams["axes.ymargin"] = .1
-rcParams["lines.markersize"] = 3
-rcParams["figure.dpi"] = DPI
-rcParams["figure.autolayout"] = true
-rcParams["figure.figsize"] = (WIDTH, 3 * WIDTH / 4)
-rcParams["figure.facecolor"] = "white"
-rcParams["font.size"] = 12
-rcParams["grid.color"] = "0"
-rcParams["grid.linestyle"] = "-"
-rcParams["legend.edgecolor"] = "1"
-rcParams["legend.fontsize"] = 12
-rcParams["xtick.labelsize"] = 12
-rcParams["ytick.labelsize"] = 12
-rcParams["font.family"] = "DeJavu Serif"
-rcParams["font.serif"] = "Computer Modern Roman"
-rcParams["mathtext.fontset"] = "cm"
-rcParams["mathtext.rm"] = "serif"
-rcParams["text.usetex"] = false
-figurePath = "/figures"
+# rcParams = PyDict(matplotlib["rcParams"])
+# rcParams["axes.labelsize"] = 14
+# rcParams["axes.xmargin"] = 0
+# rcParams["axes.ymargin"] = .1
+# rcParams["lines.markersize"] = 3
+# rcParams["figure.dpi"] = DPI
+# rcParams["figure.autolayout"] = true
+# rcParams["figure.figsize"] = (WIDTH, 3 * WIDTH / 4)
+# rcParams["figure.facecolor"] = "white"
+# rcParams["font.size"] = 12
+# rcParams["grid.color"] = "0"
+# rcParams["grid.linestyle"] = "-"
+# rcParams["legend.edgecolor"] = "1"
+# rcParams["legend.fontsize"] = 12
+# rcParams["xtick.labelsize"] = 12
+# rcParams["ytick.labelsize"] = 12
+# rcParams["font.family"] = "DeJavu Serif"
+# rcParams["font.serif"] = "Computer Modern Roman"
+# rcParams["mathtext.fontset"] = "cm"
+# rcParams["mathtext.rm"] = "serif"
+# rcParams["text.usetex"] = false
+# figurePath = "/figures"
 
 
 include("Ising.jl")
-n = 21;
+n = 100;
 J = 0.5; n_iters = 10^4; sample_freq = 20; h=0;
 iter = 1:n_iters+1
 
-M, E = @time MCIsing3d(n, J, h, n_iters)
+M, E = @time MCIsing2d(n, J, h, n_iters)
 
 # Plot and save the energy trajectory
 
