@@ -1,4 +1,5 @@
 import matplotlib
+import time
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
@@ -31,14 +32,27 @@ matplotlib.rcParams.update(
         'text.usetex': False
     }
 )
-from Ising import Ising2D
+from Ising import Ising2DVect, Ising2D
 
-model = Ising2D(100,0.5,0.,1000)
+n = 40
+J = 0.50
+h = 0.0
+n_iter = 1000
 
+t=time.time()
+model = Ising2DVect(n,J,h,n_iter)
 M,E = model.run()
+print(f"Program time, fast: {time.time()-t} seconds")
+print(f"M, E = {M[-1]}, {E[-1]}")
+
+# t=time.time()
+# model = Ising2D(n,J,h,n_iter)
+# M1,E1 = model.run()
+# print(f"Program time, slow: {time.time()-t} seconds")
+# print(f"M, E = {M1[-1]}, {E1[-1]}")
 
 figurePath = "figures"
-iter = range(1000)
+iter = range(n_iter)
 # Plot and save the energy trajectory
 plt.figure(1,tight_layout=True)
 plt.plot(iter,E,'.k')
