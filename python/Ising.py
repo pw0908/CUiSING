@@ -101,7 +101,6 @@ class Ising2DVect(object):
         self.n_iters = n_iters
         self.E = np.zeros(n_iters)
         self.M = np.zeros(n_iters)
-        self.e = 0.0
         self.m = 0.0
         np.random.seed()
         self.A = 1 - 2 * np.random.randint(2, size=(n,n))
@@ -120,12 +119,21 @@ class Ising2DVect(object):
         h = self.h
         A = self.A
         n = self.n
-        return 2.0*(J*A[i,j]*(A[i,np.mod((n+np.mod(j+1,n)),n)]+A[i,np.mod((n+np.mod(j-1,n)),n)]+
-                          A[np.mod((n+np.mod(i+1,n)),n),j]+A[np.mod((n+np.mod(i-1,n)),n),j])+
+        # return 2.0*(J*A[i,j]*(A[i,np.mod((n+np.mod(j+1,n)),n)]+A[i,np.mod((n+np.mod(j-1,n)),n)]+
+        #                   A[np.mod((n+np.mod(i+1,n)),n),j]+A[np.mod((n+np.mod(i-1,n)),n),j])+
+        #                   A[i,j]*h)
+        return 2.0*(J*A[i,j]*(A[i,(n+((j+1)%n))%n]+A[i,(n+((j-1)%n))%n]+
+                          A[(n+((i+1)%n))%n,j]+A[(n+((i-1)%n))%n,j])+
                           A[i,j]*h)
     
     def diff_neigh(self):
         A = self.A
+        n = self.n
+        
+        # dnn_flat = [(A[i,(n+((j+1)%n))%n]+A[i,(n+((j-1)%n))%n]+
+        #                   A[(n+((i+1)%n))%n,j]+A[(n+((i-1)%n))%n,j]) for i,j in pos]
+        # dnn = np.reshape(np.array(dnn_flat),(n,n),order='C')
+        # return dnn
         return np.add.reduce([np.roll(A,1,axis=0), np.roll(A,-1,axis=0), np.roll(A,1,axis=1), np.roll(A,-1,axis=1)])
     
     def run(self):
