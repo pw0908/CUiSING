@@ -129,7 +129,6 @@ class Ising2DVect(object):
     def diff_neigh(self):
         A = self.A
         n = self.n
-        
         # dnn_flat = [(A[i,(n+((j+1)%n))%n]+A[i,(n+((j-1)%n))%n]+
         #                   A[(n+((i+1)%n))%n,j]+A[(n+((i-1)%n))%n,j]) for i,j in pos]
         # dnn = np.reshape(np.array(dnn_flat),(n,n),order='C')

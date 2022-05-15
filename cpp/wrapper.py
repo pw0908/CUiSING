@@ -36,10 +36,10 @@ matplotlib.rcParams.update(
 )
 
 # Set system parameters
-n_iters = 10000 # Number of MC iterations
+n_iters = 100 # Number of MC iterations
 d = 2           # Number of dimensions
-n = 100         # Number of cells per dimension
-J = .5          # Interaction strength
+n = 1000         # Number of cells per dimension
+J = .1          # Interaction strength
 h = 0.0         # Magnetic field strength
 
 # Setup output file structure
