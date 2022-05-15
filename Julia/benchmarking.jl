@@ -30,27 +30,34 @@ format="png"
 
 
 include("Ising.jl")
-n = 100;
-J = 0.5; n_iters = 10^4; sample_freq = 20; h=0;
-iter = 1:n_iters+1
 
-M, E = @time MCIsing2d(n, J, h, n_iters)
+n = parse(Int64, ARGS[3]);
+J = parse(Float64, ARGS[4]); n_iters = parse(Int64, ARGS[1]); h= parse(Float64, ARGS[5]);
+d = parse(Int64, ARGS[2])
+iter = 1:n_iters+1
+if d == 2
+    model = Ising2DParam(n, J, h, n_iters)
+else
+    model = Ising3DParam(n, J, h, n_iters)
+end
+
+M, E = @time MCIsing(model)
 
 # Plot and save the energy trajectory
 
-plt.figure(1,tight_layout=true)
-plt.clf()
-plt.plot(iter,E,".k")
-plt.xlabel(r"$i$")
-plt.ylabel(r"$E$")
-plt.title(r"$E$  Trajectory")
-plt.savefig("E_vs_i.png")
+# plt.figure(1,tight_layout=true)
+# plt.clf()
+# plt.plot(iter,E,".k")
+# plt.xlabel(r"$i$")
+# plt.ylabel(r"$E$")
+# plt.title(r"$E$  Trajectory")
+# plt.savefig("E_vs_i.png")
 
 # Plot and save the magnetization trajectory
-plt.figure(2,tight_layout=true)
-plt.clf()
-plt.plot(iter,M,".k")
-plt.xlabel(r"$i$")
-plt.ylabel(r"$M$")
-plt.title(r"$M$  Trajectory")
-plt.savefig("M_vs_i.png")
+# plt.figure(2,tight_layout=true)
+# plt.clf()
+# plt.plot(iter,M,".k")
+# plt.xlabel(r"$i$")
+# plt.ylabel(r"$M$")
+# plt.title(r"$M$  Trajectory")
+# plt.savefig("M_vs_i.png")
