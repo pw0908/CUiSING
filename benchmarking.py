@@ -58,16 +58,20 @@ data_name = pc+delim+str(n_iters)+delim+str(J)+delim+str(h)+delim+str(d)+".dat"
 
 t_cpp = np.zeros(len(n))
 t_julia = np.zeros(len(n))
+t_python = np.zeros(len(n))
 
 for i in pbar(range(len(n))):
     process_cpp = subprocess.run(["./cpp/Ising",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
     t_cpp[i] = re.search('Program Time : (.*) seconds', str(process_cpp.stdout)).group(1)
     process_julia = subprocess.run(["julia Julia/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
     t_julia[i] = re.search(' (.*) seconds', str(process_julia.stdout)).group(1)
+    process_python = subprocess.run(["python python/benchmarking.py",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
+    t_python[i] = re.search('Program Time : (.*) seconds', str(process_python.stdout)).group(1)
 
 plt.figure(1,tight_layout=True)
 plt.loglog(n,t_cpp,'.b', label = "C++")
 plt.loglog(n,t_julia,'.g', label = "Julia")
+plt.loglog(n,t_python,'.r',label="Python")
 plt.xlabel(r'$n$')
 plt.ylabel(r'$t / $s')
 plt.title(rf'{d}D Benchmarks')
@@ -76,6 +80,6 @@ plt.savefig(figure_root+figure_name)
 
 with open(data_root+data_name,'w',newline='') as f:
     linewriter = csv.writer(f,delimiter=' ', quoting=csv.QUOTE_MINIMAL,dialect='unix')
-    for n_, tc, tj in zip(n, t_cpp, t_julia):
-                contents = [n_,tc,tj]
+    for n_, tc, tj, tp in zip(n, t_cpp, t_julia, t_python):
+                contents = [n_,tc,tj,tp]
                 linewriter.writerow(contents)
