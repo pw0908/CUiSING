@@ -9,6 +9,10 @@ import numpy as np
 import csv
 from progressbar import ProgressBar
 pbar = ProgressBar()
+import timeit
+import sys
+import os
+sys.path.append("python/")
 
 # Set figure parameters
 WIDTH = 1.5 * 8.3 / 2.54
@@ -41,11 +45,12 @@ matplotlib.rcParams.update(
 )
 
 
-n = np.logspace(1,3,50).astype(int)
-n_iters = int(1e3)
+# n = np.logspace(1,2,25).astype(int)
+n = [10,12,14,16]
+n_iters = int(1e2)
 J = 0.1
 h = 0
-d = int(2)
+d = int(3)
 
 pc = "Sam"
 delim = "_"
@@ -58,16 +63,31 @@ data_name = pc+delim+str(n_iters)+delim+str(J)+delim+str(h)+delim+str(d)+".dat"
 
 t_cpp = np.zeros(len(n))
 t_julia = np.zeros(len(n))
+t_python = np.zeros(len(n))
+
+setup = '''from Ising import Ising2DVect,Ising3DVect'''
 
 for i in pbar(range(len(n))):
     process_cpp = subprocess.run(["./cpp/Ising",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
     t_cpp[i] = re.search('Program Time : (.*) seconds', str(process_cpp.stdout)).group(1)
     process_julia = subprocess.run(["julia Julia/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
     t_julia[i] = re.search(' (.*) seconds', str(process_julia.stdout)).group(1)
+    if d == 2:
+        stmt = '''model = Ising2DVect(n[i],J,h,n_iters)
+M,E = model.run()'''
+    elif d == 3:
+        stmt = '''model = Ising3DVect(n[i],J,h,n_iters)
+M,E = model.run()'''
+    t_python[i] = timeit.timeit(setup=setup,stmt=stmt,number=1,globals=globals())
+    with open(data_root+data_name,'a') as f:
+        f.write(str(n[i])+" "+str(t_cpp[i])+" "+str(t_julia[i])+" "+str(t_python[i])+"\n")
+
+
 
 plt.figure(1,tight_layout=True)
 plt.loglog(n,t_cpp,'.b', label = "C++")
 plt.loglog(n,t_julia,'.g', label = "Julia")
+plt.loglog(n,t_python,'.r',label="Python")
 plt.xlabel(r'$n$')
 plt.ylabel(r'$t / $s')
 plt.title(rf'{d}D Benchmarks')
@@ -76,6 +96,6 @@ plt.savefig(figure_root+figure_name)
 
 with open(data_root+data_name,'w',newline='') as f:
     linewriter = csv.writer(f,delimiter=' ', quoting=csv.QUOTE_MINIMAL,dialect='unix')
-    for n_, tc, tj in zip(n, t_cpp, t_julia):
-                contents = [n_,tc,tj]
+    for n_, tc, tj, tp in zip(n, t_cpp, t_julia, t_python):
+                contents = [n_,tc,tj,tp]
                 linewriter.writerow(contents)

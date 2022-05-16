@@ -1,5 +1,8 @@
+
+
+
 import matplotlib
-import time
+import timeit
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
@@ -32,18 +35,29 @@ matplotlib.rcParams.update(
         'text.usetex': False
     }
 )
-from Ising import Ising2DVect, Ising2D
 
-n = 40
-J = 0.50
-h = 0.0
-n_iter = 1000
+setup = '''
+from Ising import Ising2DVect
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("n_iter")
+parser.add_argument("d")
+parser.add_argument("n")
+parser.add_argument("J")
+parser.add_argument("h")
+args = parser.parse_args()
+n_iter = int(args.n_iter)
+d = int(args.d)
+n = int(args.n)
+J = float(args.J)
+h = float(args.h)
+'''
 
-t=time.time()
+stmt = '''
 model = Ising2DVect(n,J,h,n_iter)
 M,E = model.run()
-print(f"Program time, fast: {time.time()-t} seconds")
-print(f"M, E = {M[-1]}, {E[-1]}")
+'''
+print(f"Program time : {timeit.timeit(setup=setup,stmt=stmt,number=1)} seconds")
 
 # t=time.time()
 # model = Ising2D(n,J,h,n_iter)
@@ -51,20 +65,20 @@ print(f"M, E = {M[-1]}, {E[-1]}")
 # print(f"Program time, slow: {time.time()-t} seconds")
 # print(f"M, E = {M1[-1]}, {E1[-1]}")
 
-figurePath = "figures"
-iter = range(n_iter)
-# Plot and save the energy trajectory
-plt.figure(1,tight_layout=True)
-plt.plot(iter,E,'.k')
-plt.xlabel(r'$i$')
-plt.ylabel(r'$E$')
-plt.title(r'$E$  Trajectory')
-plt.savefig(figurePath+'/E_vs_i.png')
+# figurePath = "figures"
+# iter = range(n_iter)
+# # Plot and save the energy trajectory
+# plt.figure(1,tight_layout=True)
+# plt.plot(iter,E,'.k')
+# plt.xlabel(r'$i$')
+# plt.ylabel(r'$E$')
+# plt.title(r'$E$  Trajectory')
+# plt.savefig(figurePath+'/E_vs_i.png')
 
-# Plot and save the magnetization trajectory
-plt.figure(2,tight_layout=True)
-plt.plot(iter,M,'.k')
-plt.xlabel(r'$i$')
-plt.ylabel(r'$M$')
-plt.title(r'$M$  Trajectory')
-plt.savefig(figurePath+'/M_vs_i.png')
+# # Plot and save the magnetization trajectory
+# plt.figure(2,tight_layout=True)
+# plt.plot(iter,M,'.k')
+# plt.xlabel(r'$i$')
+# plt.ylabel(r'$M$')
+# plt.title(r'$M$  Trajectory')
+# plt.savefig(figurePath+'/M_vs_i.png')
