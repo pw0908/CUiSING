@@ -9,6 +9,10 @@ import numpy as np
 import csv
 from progressbar import ProgressBar
 pbar = ProgressBar()
+import timeit
+import sys
+import os
+sys.path.append("python/")
 
 # Set figure parameters
 WIDTH = 1.5 * 8.3 / 2.54
@@ -60,13 +64,17 @@ t_cpp = np.zeros(len(n))
 t_julia = np.zeros(len(n))
 t_python = np.zeros(len(n))
 
+setup = '''from Ising import Ising2DVect'''
+
 for i in pbar(range(len(n))):
     process_cpp = subprocess.run(["./cpp/Ising",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
     t_cpp[i] = re.search('Program Time : (.*) seconds', str(process_cpp.stdout)).group(1)
     process_julia = subprocess.run(["julia Julia/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
     t_julia[i] = re.search(' (.*) seconds', str(process_julia.stdout)).group(1)
-    process_python = subprocess.run(["python python/benchmarking.py",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
-    t_python[i] = re.search('Program Time : (.*) seconds', str(process_python.stdout)).group(1)
+
+    stmt = '''model = Ising2DVect(n[i],J,h,n_iters)
+M,E = model.run()'''
+    t_python[i] = timeit.timeit(setup=setup,stmt=stmt,number=1,globals=globals())
 
 plt.figure(1,tight_layout=True)
 plt.loglog(n,t_cpp,'.b', label = "C++")
