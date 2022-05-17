@@ -45,12 +45,11 @@ matplotlib.rcParams.update(
 )
 
 
-# n = np.logspace(1,2,25).astype(int)
-n = [10,12,14,16]
-n_iters = int(1e2)
+n = np.logspace(1,3,50).astype(int)
+n_iters = int(1e3)
 J = 0.1
 h = 0
-d = int(3)
+d = int(2)
 
 pc = "Sam"
 delim = "_"
@@ -60,6 +59,9 @@ data_root = "benchmarking/"+str(d)+"d/data/"
 
 figure_name = pc+delim+str(n_iters)+delim+str(J)+delim+str(h)+delim+str(d)+"."+format
 data_name = pc+delim+str(n_iters)+delim+str(J)+delim+str(h)+delim+str(d)+".dat"
+
+if os.path.exists(data_root+data_name):
+    os.remove(data_root+data_name)
 
 t_cpp = np.zeros(len(n))
 t_julia = np.zeros(len(n))
@@ -81,8 +83,6 @@ M,E = model.run()'''
     t_python[i] = timeit.timeit(setup=setup,stmt=stmt,number=1,globals=globals())
     with open(data_root+data_name,'a') as f:
         f.write(str(n[i])+" "+str(t_cpp[i])+" "+str(t_julia[i])+" "+str(t_python[i])+"\n")
-
-
 
 plt.figure(1,tight_layout=True)
 plt.loglog(n,t_cpp,'.b', label = "C++")
