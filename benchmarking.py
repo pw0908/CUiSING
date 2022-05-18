@@ -45,13 +45,13 @@ matplotlib.rcParams.update(
 )
 
 
-n = np.logspace(1,3,50).astype(int)
+n = np.logspace(2,2,1).astype(int)
 n_iters = int(1e3)
 J = 0.1
 h = 0
-d = int(2)
+d = int(3)
 
-pc = "Sam"
+pc = "Sam_add"
 delim = "_"
 
 figure_root = "benchmarking/"+str(d)+"d/figures/"
@@ -73,7 +73,7 @@ for i in pbar(range(len(n))):
     process_cpp = subprocess.run(["./cpp/Ising",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
     t_cpp[i] = re.search('Program Time : (.*) seconds', str(process_cpp.stdout)).group(1)
     process_julia = subprocess.run(["julia Julia/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
-    t_julia[i] = re.search(' (.*) seconds', str(process_julia.stdout)).group(1)
+    t_julia[i] = re.search('(.*) seconds', str(process_julia.stdout)).group(1).split("b'")[-1].split()[-1]
     if d == 2:
         stmt = '''model = Ising2DVect(n[i],J,h,n_iters)
 M,E = model.run()'''
