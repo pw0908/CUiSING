@@ -1,5 +1,10 @@
 #include "../Ising.h"
 
+/*
+* Calculating these random numbers can be done
+* in parallel using a variety of algorithms. So long
+* as they are not based on system time.
+*/
 void Ising::getRandom2d()
 {
     for (int i = 0; i < n; i++)
@@ -11,6 +16,11 @@ void Ising::getRandom2d()
     }
 }
 
+/*
+* Calculating these random numbers can be done
+* in parallel using a variety of algorithms. So long
+* as they are not based on system time.
+*/
 void Ising::getRandom3d()
 {
     for (int i = 0; i < n; i++)

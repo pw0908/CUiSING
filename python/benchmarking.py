@@ -1,6 +1,3 @@
-
-
-
 import matplotlib
 import timeit
 matplotlib.use('Agg')
@@ -36,8 +33,6 @@ matplotlib.rcParams.update(
     }
 )
 
-setup = '''
-from Ising import Ising2DVect
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("n_iter")
@@ -51,13 +46,16 @@ d = int(args.d)
 n = int(args.n)
 J = float(args.J)
 h = float(args.h)
+
+setup = '''
+from Ising import Ising2DVect
 '''
 
 stmt = '''
 model = Ising2DVect(n,J,h,n_iter)
 M,E = model.run()
 '''
-print(f"Program time : {timeit.timeit(setup=setup,stmt=stmt,number=1)} seconds")
+print(f"Program time : {timeit.timeit(setup=setup,stmt=stmt,number=1,globals=globals())} seconds")
 
 # t=time.time()
 # model = Ising2D(n,J,h,n_iter)

@@ -1,5 +1,12 @@
 #include "../Ising.h"
 
+/*
+ * This function will be parallelized using a reduction
+ * like we did in class. Since this is a sum over all
+ * spins, the energy for each spin can be calculated in
+ * parallel and then added up using a reduction, and 
+ * finally an atomic add.
+ */
 void Ising::calcHamiltonian2d()
 {
     double e = 0.0;
@@ -15,6 +22,13 @@ void Ising::calcHamiltonian2d()
     E[iter] = e;
 }
 
+/*
+ * This function will be parallelized using a reduction
+ * like we did in class. Since this is a sum over all
+ * spins, the energy for each spin can be calculated in
+ * parallel and then added up using a reduction, and 
+ * finally an atomic add.
+ */
 void Ising::calcHamiltonian3d()
 {
     double e = 0.0;
@@ -50,6 +64,12 @@ void Ising::calcDeltaHamiltonian3d(int i, int j, int k)
                               A3d[i][j][k]*h);
 }
 
+/*
+ * This function will be parallelized using a reduction
+ * like we did in class. Since this is a sum over all
+ * spins they can be added using a reduction, and 
+ * finally an atomic add.
+ */
 void Ising::calcMagnetization2d()
 {
     int m = 0;
@@ -63,6 +83,12 @@ void Ising::calcMagnetization2d()
     M[iter] = m / (double)N;
 }
 
+/*
+ * This function will be parallelized using a reduction
+ * like we did in class. Since this is a sum over all
+ * spins they can be added using a reduction, and 
+ * finally an atomic add.
+ */
 void Ising::calcMagnetization3d()
 {
     int m = 0;

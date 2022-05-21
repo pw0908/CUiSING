@@ -38,6 +38,14 @@ Ising::Ising(int n_iters_, int d_, int n_, double J_, double h_)
     setOutputFileStructure();
 }
 
+/*
+* This loop can be semi-parallelized since spins only interact with
+* their nearest neighbors. We can implement a checkerboard stencil
+* where we flip spins in parallel so long as they are non-interacting
+* which is totally legal. Instead of all spins being calculated in
+* series, we can flip up to half of the spins in parallel utilizing the
+* many threads on the GPU.
+*/
 void Ising::monteCarlo2d()
 {
     initializeSystem2d();
@@ -70,6 +78,14 @@ void Ising::monteCarlo2d()
     finalizeSystem2d();
 }
 
+/*
+* This loop can be semi-parallelized since spins only interact with
+* their nearest neighbors. We can implement a checkerboard stencil
+* where we flip spins in parallel so long as they are non-interacting
+* which is totally legal. Instead of all spins being calculated in
+* series, we can flip up to half of the spins in parallel utilizing the
+* many threads on the GPU.
+*/
 void Ising::monteCarlo3d()
 {
     initializeSystem3d();
