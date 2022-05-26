@@ -5,13 +5,14 @@ This package was developed as part of the CS 179 course requirement in Caltech.
 
 The Ising model is a lattice model in which spins interact via magnetic interactions, and also interact with an externally applied external field. Spins can be in one of two states, up or down. The Hamiltonian for the simple Ising model is,
 $$H(\{\mathbf{s}\})=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
+where the first sum is over all spins, and their nearest neighbors.
 
-In Markov Chain Monte Carlo (MCMC) a series of moves are attempted, and accepted based on probabilistic criteria. In this package, we have implemented the Metropolis-Hastings algorithm which uses the Boltzmann weight from statistical mechanics combined with detailed balance.
+In Markov Chain Monte Carlo (MCMC) a series of moves are attempted, and accepted based on probabilistic criteria to drive the system to the lowest free energy state. In this package, we have implemented the Metropolis-Hastings algorithm which uses the Boltzmann weight from statistical mechanics combined with detailed balance.
 ## CPU Demo
 
 This package features CPU based implementations in three different programming languages; C++, Julia, and Python. The purpose is to compare the CPU performance of basic Ising monte carlo simulations. Later, parallelization and GPU performance will be compared between the 3 languages as well.
 
-Each of the cpu codes are self contained in their respective folders within CuISING/. The following sections describe how to run each of the CPU codes.
+Each of the cpu codes are self contained in their respective folders within CUiSING/. The following sections describe how to run each of the CPU codes.
 
 ### C++
 
@@ -58,7 +59,7 @@ Thusfar we have done some work with benchmarking the CPU implementation across d
 The 2d and 3d results as run on Sam's PC (Intel i9-10850k) are given below,
 ![Sam 2d benchmarks](benchmarking/2d/figures/Sam_1000_0.1_0_2.png)
 ![Sam 3d benchmarks](benchmarking/3d/figures/Sam_1000_0.1_0_3.png)
-Note that we do recover the proper $n^d$ scaling as expected without any parallelization. This is because each mc iteration requires a loop over all $n^d$ particles in the system.
+Note that we do recover the proper $n^d$ scaling as expected without any parallelization. This is because each MC iteration requires a loop over all $n^d$ particles in the system.
 
 Pierre has also run some benchmarks with similar results both on his PC (Ryzen 5900X) and his 2022 Macbook Pro (ARM).
 
@@ -75,7 +76,7 @@ n = np.logspace(low,high,number).astype(int)
 Coming soon...
 
 The C++ code has comments above the functions which will be parallelized on the GPU. We plan to implement the following parallelizations in all languages:
-- Parallelizing the Hamiltonian calculation by parallelizing the calculation of individual spin energies, using a reduction ot add them per warp, and then using an atomic add to add up the contributions from each warp.
+- Parallelizing the Hamiltonian calculation by parallelizing the calculation of individual spin energies, using a reduction to add them per block, and then using an atomic add to add up the contributions from each block.
 - Parallelizing the Monte Carlo (MC) loop using a checkerboard stencil in which many MC moves can be attempted at once due to the small range of the interactions. Spins that are outside the nearest neighbor cutoff can be flipped simultaneously since their states are independent. This allows us to attempt flipping up to half of the spins at the same time. This will drastically speed up the implementation.
 - Lastly, we generate large arrays of random numbers, which can be parallelized on the GPU to generate all of the random numbers at the same time. There are algorithms which can generate arrays in parallel without relying on the system time.
   
