@@ -20,7 +20,6 @@ To run the C++ code, you must first enter the cpp directory, and compile the C++
 ```
 cd cpp
 make
-
 ```
 The C++ executable can be run with the following command and the following flags. It can also be called without any flags and the default parameters will be used.
 ```
@@ -61,8 +60,12 @@ The 2d and 3d results as run on Sam's PC (Intel i9-10850k) are given below,
 ![Sam 3d benchmarks](benchmarking/3d/figures/Sam_1000_0.1_0_3.png)
 Note that we do recover the proper $n^d$ scaling as expected without any parallelization. This is because each MC iteration requires a loop over all $n^d$ particles in the system.
 
-Pierre has also run some benchmarks with similar results both on his PC (Ryzen 5900X) and his 2022 Macbook Pro (ARM).
-
+Pierre has also run some benchmarks with similar results both on his PC (Ryzen 5900X):
+![Pierre 2d benchmarks](benchmarking/2d/figures/Pierre_1000_0.1_0_2.png)
+![Pierre 3d benchmarks](benchmarking/3d/figures/Pierre_1000_0.1_0_3.png)
+ and his 2022 Macbook Pro (ARM):
+![Pierre ARM 2d benchmarks](benchmarking/2d/figures/Pierre_ARM_1000_0.1_0_2.png)
+![Pierre ARM 3d benchmarks](benchmarking/3d/figures/Pierre_ARM_1000_0.1_0_3.png)
 Benchmarks of all of the methods can be run simultaneously by using the ```CUiSING/benchmarking.py``` within the ```CUiSING/``` folder. You can change the system and iterative parameters within the python file, and then simply run the following command.
 ```
 python benchmarking.py
