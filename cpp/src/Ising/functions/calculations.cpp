@@ -19,7 +19,7 @@ void Ising::calcHamiltonian2d()
                             A2d[i][j]*h;
         }
     }
-    E[iter] = e;
+    E[iter] = e/(n*n);
 }
 
 /*

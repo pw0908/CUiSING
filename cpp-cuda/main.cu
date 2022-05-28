@@ -60,6 +60,7 @@ __global__ void init_lattice_2d(signed int *lattice,
  *    - none (void)
  * 
  * */
+template<int sub_lattice>
 __global__ void cudaMcIteration2dKernel(signed int *lattice,
                                         const float *__restrict__ rands,
                                         const int n,
@@ -67,10 +68,17 @@ __global__ void cudaMcIteration2dKernel(signed int *lattice,
                                         const float h) {
 
     const long long tid = (long long)(blockDim.x)*blockIdx.x + threadIdx.x;
-    if (tid >= n*n) return;
-
     const int i = tid / n;
     const int j = tid % n;
+    
+    if (tid >= n*n)
+    {
+        return;
+    }
+    else if ( (i%2 != j%2) != sub_lattice)
+    {
+        return;
+    }
 
     const int sl = lattice[i*n+(n+(j-1)%n)%n];
     const int sr = lattice[i*n+(n+(j+1)%n)%n];
@@ -133,7 +141,7 @@ __global__ void cudaCalcHamiltonian2dKernel(signed int *lattice,
         int sd = lattice[(n+(i-1)%n)%n*n+j];
         int sij = lattice[idx];
         
-        shmem[tid] -= sij*(J*(sl+sr+su+sd)+h);
+        shmem[tid] -= sij*(J*(sl+sr+su+sd)/2.0+h);
     }
     __syncthreads();
 
@@ -146,7 +154,7 @@ __global__ void cudaCalcHamiltonian2dKernel(signed int *lattice,
     }
 
     if (threadIdx.x == 0)
-        atomicAdd(&E[iter], shmem[0]/2.0);
+        atomicAdd(&E[iter], shmem[0]/(n*n));
 }
 
 
@@ -259,7 +267,8 @@ void callMcIteration2d(signed int *lattice,
     int blocks = (n*n+THREADS - 1)/THREADS;
 
     CHECK_CURAND(curandGenerateUniform(cg,rands,n*n));
-    cudaMcIteration2dKernel<<<blocks,THREADS>>>(lattice,rands,n,J,h);
+    cudaMcIteration2dKernel<0><<<blocks,THREADS>>>(lattice,rands,n,J,h);
+    cudaMcIteration2dKernel<1><<<blocks,THREADS>>>(lattice,rands,n,J,h);
 }
 
 /* void callCalcHamiltonian2d
@@ -384,9 +393,13 @@ void writeEM(float *E_h, float *M_h, const int n_iters)
 
     for (unsigned i = 0; i < n_iters; i++)
     {
-        emStream << i << " ";
-        emStream << std::fixed << std::setprecision(5) << E_h[i] << " ";
-        emStream << std::fixed << std::setprecision(5) << M_h[i] << " \n";
+        if (!(i%10))
+        {
+            emStream << i << " ";
+            emStream << std::fixed << std::setprecision(5) << E_h[i] << " ";
+            emStream << std::fixed << std::setprecision(5) << M_h[i] << " \n";
+        }
+        
     }
 
 }
