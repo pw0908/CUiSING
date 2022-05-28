@@ -5,7 +5,7 @@ CC=g++
 LD=$(CUDACC)
 LDFLAGS=-L$(CUDA_INCLUDE) -lcurand
 CFLAGS=-c -O3 -g -I$(CUDA_HOME)/include
-CUDACFLAGS= -std=c++17 -c -O3 -lineinfo -arch=sm_86
+CUDACFLAGS= -std=c++17 -c -O3 -lineinfo -arch=sm_8
 
 all: ising
 	rm main.o
