@@ -7,7 +7,6 @@
 /*      CUDA Kernels      */
 /**************************/
 
-/* !!!!!UNFINISHED!!!! */
 /* __global__ void cudaMCIteration3dKernel
  *
  * Location: DEVICE

@@ -7,7 +7,7 @@
 /*      CUDA Kernels      */
 /**************************/
 
-/* __global__ void init_lattice_2d
+/* __global__ void init_lattice
  *
  * Location: DEVICE
  * 
@@ -20,6 +20,7 @@
  *    - signed int *lattice: the lattice stored in device memory
  *    - const float *__restrict__ rands: numbers generated from U(0,1), stored in device memory
  *    - const long long n: number of spins in each dimension
+ *    - const int d: dimensionality of system (2 or 3)
  * 
  * Outputs:
  *    - none (void)
@@ -32,7 +33,6 @@ __global__ void init_lattice(signed int *lattice,
 
 
 
-/* !!!!!UNFINISHED!!!! */
 /* __global__ void cudaMCIteration2dKernel
  *
  * Location: DEVICE
@@ -147,6 +147,7 @@ __global__ void cudaCalcMagnetization2dKernel(signed int *lattice,
  *    - curandGenerator_t cg: a cuRAND generator
  *    - float *rands: array for randodm numbers stored on device
  *    - const int n: number of spins in each dimension
+ *    - const int d: dimensionality of system (2 or 3)
  * 
  * Output:
  *    - none (void)
