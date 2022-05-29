@@ -56,17 +56,17 @@ int main(int argc, char **argv){
     CHECK_CURAND(curandCreateGenerator(&cg, CURAND_RNG_PSEUDO_PHILOX4_32_10));
     CHECK_CURAND(curandSetPseudoRandomGeneratorSeed(cg, seed));
     float *rands;
-    CHECK_CUDA(cudaMalloc(&rands, n * n * sizeof(*rands)));
+    CHECK_CUDA(cudaMalloc(&rands, round(std::pow(n,d)) * sizeof(*rands)));
 
     /* Generate initial random numbers on device, for initializing lattice */
-    gen_rands(cg,rands,n);
+    gen_rands(cg,rands,n,d);
 
     /* Setup lattice and allocate memory for storage */
     signed int *lattice;
-    CHECK_CUDA(cudaMalloc(&lattice, n * n * sizeof(*lattice)));
+    CHECK_CUDA(cudaMalloc(&lattice, round(std::pow(n,d)) * sizeof(*lattice)));
     /* Initialize the lattice using the previously generated random array on device */
-    int blocks = (n*n+THREADS - 1)/THREADS;
-    init_lattice_2d<<<blocks,THREADS>>>(lattice,rands, n);
+    int blocks = (round(std::pow(n,d))+THREADS - 1)/THREADS;
+    init_lattice<<<blocks,THREADS>>>(lattice,rands,n,d);
 
     /* Make sure the device is synced */
     CHECK_CUDA(cudaDeviceSynchronize());
@@ -75,11 +75,28 @@ int main(int argc, char **argv){
     auto t0 = std::chrono::high_resolution_clock::now();
 
     /* Enter monte carlo loop for n_iters iterations */
-    for (int i = 0; i < n_iters; i++)
+    if (d==2)
     {
-        callMcIteration2d(lattice,cg,rands,n,J,h);  // update the lattice
-        callCalcHamiltonian2d(lattice,E,n,J,h,i);   // calculate the energy and store in E
-        callCalcMagnetization2d(lattice,M,n,J,h,i); // calculate the mag and store in M
+        for (int i = 0; i < n_iters; i++)
+        {
+            callMcIteration2d(lattice,cg,rands,n,J,h);  // update the lattice
+            callCalcHamiltonian2d(lattice,E,n,J,h,i);   // calculate the energy and store in E
+            callCalcMagnetization2d(lattice,M,n,J,h,i); // calculate the mag and store in M
+        }
+    }
+    else if (d==3)
+    {
+        for (int i = 0; i < n_iters; i++)
+        {
+            callMcIteration3d(lattice,cg,rands,n,J,h);  // update the lattice
+            callCalcHamiltonian3d(lattice,E,n,J,h,i);   // calculate the energy and store in E
+            callCalcMagnetization3d(lattice,M,n,J,h,i); // calculate the mag and store in M
+        }
+    }
+    else
+    {
+        std::cerr << "Error: d = " << d << " is not a valid dimension (must be 2 or 3)\n";
+        std::exit(0);
     }
 
     /* Ensure device is synced */
@@ -96,8 +113,8 @@ int main(int argc, char **argv){
 
     /* Copy the final latice configuration to the host */
     signed int *lattice_h;
-    lattice_h = new signed int [n*n];
-    CHECK_CUDA(cudaMemcpy(lattice_h, lattice, n*n * sizeof(float), cudaMemcpyDeviceToHost));
+    lattice_h = new signed int [(long long)round(std::pow(n,d))];
+    CHECK_CUDA(cudaMemcpy(lattice_h, lattice, round(std::pow(n,d))*sizeof(float), cudaMemcpyDeviceToHost));
 
     /* Output program duration */
     printf("Total Program Time: %f seconds\n", duration * 1e-6);

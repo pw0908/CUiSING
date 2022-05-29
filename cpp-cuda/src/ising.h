@@ -13,7 +13,8 @@
 #include <cuda_runtime.h>
 
 #include "cuda_helper.h"
-#include "ising.cuh"
+#include "ising2d.cuh"
+#include "ising3d.cuh"
 
 #define THREADS 256
 

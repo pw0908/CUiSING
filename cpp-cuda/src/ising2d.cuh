@@ -1,4 +1,7 @@
-#include "ising.h"
+#ifndef ISING2D_CUH
+#define ISING2D_CUH
+
+#include "cuda_helper.h"
 
 /**************************/
 /*      CUDA Kernels      */
@@ -22,15 +25,12 @@
  *    - none (void)
  * 
  */
-__global__ void init_lattice_2d(signed int *lattice,
+__global__ void init_lattice(signed int *lattice,
                                 const float* __restrict__ rands,
-                                const long long n) {
-    
-    const long long tid = (long long)blockDim.x*blockIdx.x + threadIdx.x;
-    if (tid >= n*n) return;
-    float r = rands[tid];
-    lattice[tid] = (r < 0.5f) ? -1 : 1;
-}
+                                const long long n,
+                                const int d);
+
+
 
 /* !!!!!UNFINISHED!!!! */
 /* __global__ void cudaMCIteration2dKernel
@@ -65,31 +65,7 @@ __global__ void cudaMcIteration2dKernel(signed int *lattice,
                                         const float *__restrict__ rands,
                                         const int n,
                                         const float J,
-                                        const float h) {
-
-    const long long tid = (long long)(blockDim.x)*blockIdx.x + threadIdx.x;
-    const int i = tid / n;
-    const int j = tid % n;
-    
-    if (tid >= n*n)
-    {
-        return;
-    }
-    else if ( (i%2 != j%2) != sub_lattice)
-    {
-        return;
-    }
-
-    const int sl = lattice[i*n+(n+(j-1)%n)%n];
-    const int sr = lattice[i*n+(n+(j+1)%n)%n];
-    const int su = lattice[(n+(i+1)%n)%n*n+j];
-    const int sd = lattice[(n+(i-1)%n)%n*n+j];
-
-    const int sum_spins = sl + sr + su + sd;
-    const int sij = lattice[tid];
-    float boltz = exp(-2.0*sij*(sum_spins*J+h));
-    if (rands[tid]<=boltz) lattice[tid] = -sij;
-}
+                                        const float h);
 
 
 /* __global__ void cudaCalcHamiltonian2dKernel
@@ -124,38 +100,7 @@ __global__ void cudaCalcHamiltonian2dKernel(signed int *lattice,
                                             const int n,
                                             const float J,
                                             const float h,
-                                            const int iter) {
-    
-    extern __shared__ float shmem[];
-
-    unsigned tid = threadIdx.x;
-    unsigned idx = tid + blockIdx.x * blockDim.x;
-    shmem[tid] = 0.0;
-    for (; idx < n*n; idx += blockDim.x * gridDim.x)
-    {
-        unsigned i = idx / n;
-        unsigned j = idx % n;
-        int sl = lattice[i*n+(n+(j-1)%n)%n];
-        int sr = lattice[i*n+(n+(j+1)%n)%n];
-        int su = lattice[(n+(i+1)%n)%n*n+j];
-        int sd = lattice[(n+(i-1)%n)%n*n+j];
-        int sij = lattice[idx];
-        
-        shmem[tid] -= sij*(J*(sl+sr+su+sd)/2.0+h);
-    }
-    __syncthreads();
-
-    for (unsigned s = blockDim.x / 2; s>0; s>>=1)
-    {
-        if (tid < s)
-            shmem[tid] += shmem[tid + s];
-        
-        __syncthreads();
-    }
-
-    if (threadIdx.x == 0)
-        atomicAdd(&E[iter], shmem[0]/(n*n));
-}
+                                            const int iter);
 
 
 /* __global__ void cudaCalcMagnetization2dKernel
@@ -185,30 +130,7 @@ __global__ void cudaCalcMagnetization2dKernel(signed int *lattice,
                                               const int n,
                                               const float J,
                                               const float h,
-                                              const int iter) {
-    
-    extern __shared__ float shmem[];
-
-    unsigned tid = threadIdx.x;
-    unsigned idx = tid + blockIdx.x * blockDim.x;
-    shmem[tid] = 0.0;
-    for (; idx < n*n; idx += blockDim.x * gridDim.x)
-    {
-        shmem[tid] += lattice[idx];
-    }
-    __syncthreads();
-
-    for (unsigned s = blockDim.x / 2; s>0; s>>=1)
-    {
-        if (tid < s)
-            shmem[tid] += shmem[tid + s];
-        
-        __syncthreads();
-    }
-
-    if (threadIdx.x == 0)
-        atomicAdd(&M[iter], shmem[0]/(n*n));
-}
+                                              const int iter);
 
 /**************************/
 /*  Helper C++ Functions  */
@@ -230,10 +152,7 @@ __global__ void cudaCalcMagnetization2dKernel(signed int *lattice,
  *    - none (void)
  * 
  * */
-void gen_rands(curandGenerator_t cg, float *rands, int n)
-{
-    CHECK_CURAND(curandGenerateUniform(cg,rands,n*n));
-}
+void gen_rands(curandGenerator_t cg, float *rands, const int n, const int d);
 
 
 /* void callMCIteration2d
@@ -262,14 +181,7 @@ void callMcIteration2d(signed int *lattice,
                        float *rands,
                        const int n,
                        const float J,
-                       const float h){
-    
-    int blocks = (n*n+THREADS - 1)/THREADS;
-
-    CHECK_CURAND(curandGenerateUniform(cg,rands,n*n));
-    cudaMcIteration2dKernel<0><<<blocks,THREADS>>>(lattice,rands,n,J,h);
-    cudaMcIteration2dKernel<1><<<blocks,THREADS>>>(lattice,rands,n,J,h);
-}
+                       const float h);
 
 /* void callCalcHamiltonian2d
  *
@@ -296,11 +208,7 @@ void callCalcHamiltonian2d(signed int *lattice,
                            const int n,
                            const float J,
                            const float h,
-                           const int iter) {
-
-    int blocks = (n*n+THREADS - 1)/THREADS;
-    cudaCalcHamiltonian2dKernel<<<blocks,THREADS>>>(lattice,E,n,J,h,iter);
-}
+                           const int iter);
 
 
 /* void callCalcMagnetization2d
@@ -328,11 +236,7 @@ void callCalcMagnetization2d(signed int *lattice,
                              const int n,
                              const float J,
                              const float h,
-                             const int iter) {
-
-    int blocks = (n*n+THREADS - 1)/THREADS;
-    cudaCalcMagnetization2dKernel<<<blocks,THREADS>>>(lattice,M,n,J,h,iter);
-}
+                             const int iter);
 
 /* void print_lattice
  *
@@ -349,25 +253,7 @@ void callCalcMagnetization2d(signed int *lattice,
  *    - none (void)
  * 
  * */
-void print_lattice(signed int *lattice, int n)
-{
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            if (lattice[(i*n+j)] == 1)
-            {
-                std::cout << " " << lattice[(i*n+j)] << " ";
-            }
-            else
-            {
-                std::cout << lattice[(i*n+j)] << " ";
-            }
-            
-        }
-        std::cout << " \n";
-    }
-}
+void print_lattice(signed int *lattice, int n);
 
 /* void writeEM
  *
@@ -385,21 +271,6 @@ void print_lattice(signed int *lattice, int n)
  *    - none (void)
  * 
  * */
-void writeEM(float *E_h, float *M_h, const int n_iters)
-{
-    std::ofstream emStream;
-    std::string emFile = "output/output.dat";
-    emStream.open(emFile.c_str(), std::fstream::out | std::ofstream::trunc);
+void writeEM(float *E_h, float *M_h, const int n_iters);
 
-    for (unsigned i = 0; i < n_iters; i++)
-    {
-        if (!(i%10))
-        {
-            emStream << i << " ";
-            emStream << std::fixed << std::setprecision(5) << E_h[i] << " ";
-            emStream << std::fixed << std::setprecision(5) << M_h[i] << " \n";
-        }
-        
-    }
-
-}
+#endif

@@ -1,5 +1,5 @@
-#ifndef ISING_CUH
-#define ISING_CUH
+#ifndef ISING3D_CUH
+#define ISING3D_CUH
 
 #include "cuda_helper.h"
 
@@ -7,30 +7,8 @@
 /*      CUDA Kernels      */
 /**************************/
 
-/* __global__ void init_lattice_2d
- *
- * Location: DEVICE
- * 
- * This CUDA kernel is run on the device in order to fill the lattice
- * with up and down spins. It takes in an array of random uniformly
- * distributed numbers and fills the lattice with integers, either 1
- * or -1. The filling is done in parallel.
- * 
- * Inputs:
- *    - signed int *lattice: the lattice stored in device memory
- *    - const float *__restrict__ rands: numbers generated from U(0,1), stored in device memory
- *    - const long long n: number of spins in each dimension
- * 
- * Outputs:
- *    - none (void)
- * 
- */
-__global__ void init_lattice_2d(signed int *lattice,
-                                const float* __restrict__ rands,
-                                const long long n);
-
 /* !!!!!UNFINISHED!!!! */
-/* __global__ void cudaMCIteration2dKernel
+/* __global__ void cudaMCIteration3dKernel
  *
  * Location: DEVICE
  *
@@ -58,14 +36,14 @@ __global__ void init_lattice_2d(signed int *lattice,
  * 
  * */
 template<int sub_lattice>
-__global__ void cudaMcIteration2dKernel(signed int *lattice,
+__global__ void cudaMcIteration3dKernel(signed int *lattice,
                                         const float *__restrict__ rands,
                                         const int n,
                                         const float J,
                                         const float h);
 
 
-/* __global__ void cudaCalcHamiltonian2dKernel
+/* __global__ void cudaCalcHamiltonian3dKernel
  *
  * Location: DEVICE
  * 
@@ -92,7 +70,7 @@ __global__ void cudaMcIteration2dKernel(signed int *lattice,
  *    - none (void)
  * 
  * */
-__global__ void cudaCalcHamiltonian2dKernel(signed int *lattice,
+__global__ void cudaCalcHamiltonian3dKernel(signed int *lattice,
                                             float *E,
                                             const int n,
                                             const float J,
@@ -100,7 +78,7 @@ __global__ void cudaCalcHamiltonian2dKernel(signed int *lattice,
                                             const int iter);
 
 
-/* __global__ void cudaCalcMagnetization2dKernel
+/* __global__ void cudaCalcMagnetization3dKernel
  *
  * Location: DEVICE
  * 
@@ -122,7 +100,7 @@ __global__ void cudaCalcHamiltonian2dKernel(signed int *lattice,
  *    - none (void)
  * 
  * */
-__global__ void cudaCalcMagnetization2dKernel(signed int *lattice,
+__global__ void cudaCalcMagnetization3dKernel(signed int *lattice,
                                               float *M,
                                               const int n,
                                               const float J,
@@ -133,26 +111,7 @@ __global__ void cudaCalcMagnetization2dKernel(signed int *lattice,
 /*  Helper C++ Functions  */
 /**************************/
 
-/* void gen_rands
- *
- * Location: HOST
- * 
- * This host function makes a call to cuRAND to generate pseudorandom
- * numbers drawn from U(0,1) on the device.
- * 
- * Inputs:
- *    - curandGenerator_t cg: a cuRAND generator
- *    - float *rands: array for randodm numbers stored on device
- *    - const int n: number of spins in each dimension
- * 
- * Output:
- *    - none (void)
- * 
- * */
-void gen_rands(curandGenerator_t cg, float *rands, int n);
-
-
-/* void callMCIteration2d
+/* void callMCIteration3d
  *
  * Location: HOST
  * 
@@ -173,14 +132,14 @@ void gen_rands(curandGenerator_t cg, float *rands, int n);
  *    - none (void)
  * 
  * */
-void callMcIteration2d(signed int *lattice,
+void callMcIteration3d(signed int *lattice,
                        curandGenerator_t cg,
                        float *rands,
                        const int n,
                        const float J,
                        const float h);
 
-/* void callCalcHamiltonian2d
+/* void callCalcHamiltonian3d
  *
  * Location: HOST
  * 
@@ -200,7 +159,7 @@ void callMcIteration2d(signed int *lattice,
  *    - none (void)
  * 
  * */
-void callCalcHamiltonian2d(signed int *lattice,
+void callCalcHamiltonian3d(signed int *lattice,
                            float *E,
                            const int n,
                            const float J,
@@ -208,7 +167,7 @@ void callCalcHamiltonian2d(signed int *lattice,
                            const int iter);
 
 
-/* void callCalcMagnetization2d
+/* void callCalcMagnetization3d
  *
  * Location: HOST
  * 
@@ -228,14 +187,14 @@ void callCalcHamiltonian2d(signed int *lattice,
  *    - none (void)
  * 
  * */
-void callCalcMagnetization2d(signed int *lattice,
+void callCalcMagnetization3d(signed int *lattice,
                              float *M,
                              const int n,
                              const float J,
                              const float h,
                              const int iter);
 
-/* void print_lattice
+/* void print_lattice_3d
  *
  * Location: HOST
  * 
@@ -250,24 +209,6 @@ void callCalcMagnetization2d(signed int *lattice,
  *    - none (void)
  * 
  * */
-void print_lattice(signed int *lattice, int n);
-
-/* void writeEM
- *
- * Location: HOST
- * 
- * Function to write the energy (E) and magnetization (M) trajectories
- * to a file in the root directoy, called 'EM.dat'.
- * 
- * Inputs:
- *    - float *E_h: the energy trajectory stored on host memory
- *    - float *M_h: the magnetization trajectory stored on host memory
- *    - const int n_iters: the number of MC iterations
- * 
- * Output:
- *    - none (void)
- * 
- * */
-void writeEM(float *E_h, float *M_h, const int n_iters);
+// void print_lattice_3d(signed int *lattice, int n);
 
 #endif
