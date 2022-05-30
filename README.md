@@ -3,11 +3,28 @@ Welcome to CUiSING! A CUDA-parallelised implementation of the Ising model writte
 
 This package was developed as part of the CS 179 course requirement in Caltech.
 
-The Ising model is a lattice model in which spins interact via magnetic interactions, and also interact with an externally applied external field. Spins can be in one of two states, up or down. The Hamiltonian for the simple Ising model is,
+The Ising model is a lattice model in which spins interact via magnetic interactions, and also interact with an externally applied external field. Spins can be in one of two states, up (+) or down (-). The Hamiltonian for the simple Ising model is,
 $$H(\{\mathbf{s}\})=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
 where the first sum is over all spins, and their nearest neighbors.
 
-In Markov Chain Monte Carlo (MCMC) a series of moves are attempted, and accepted based on probabilistic criteria to drive the system to the lowest free energy state. In this package, we have implemented the Metropolis-Hastings algorithm which uses the Boltzmann weight from statistical mechanics combined with detailed balance.
+In Markov Chain Monte Carlo (MCMC) a series of moves are attempted, and accepted based on probabilistic criteria to drive the system to the lowest free energy state. In this package, we have implemented the Metropolis-Hastings algorithm which uses the Boltzmann weight from statistical mechanics combined with detailed balance. During the simulation, the spin state will evolve with each iteration, and therefore so will the total energy and magnetization. Detailed balance ensures that the system evolves to the equilibrium state. The energy and magnetization are the main observables of the system, and they are defined as follows,
+
+$$M=\frac{1}{N}\sum_i s_i \\[6pt]
+E=H=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
+
+
+## Overview
+
+This package contains many different implementations in different languages that run the same simulation. The goal of each one is the same, to perform Metropolis Monte Carlo on the 2d and 3d Ising model. The purpose of the different implementations is to show differences in speed among various languages on CPU, and GPU. Here, we list all the available codes with a brief description of each:
+- **cpp**: a c++ implementation, run fully on CPU
+- **cpp-cuda**: a CUDA implementation parallelized on GPU. The GPU kernels are wrapped in C++ code and functions.
+  - Requires  cuRAND package, which comes loaded with CUDA
+- **Julia**: a Julia implementation, run fully on CPU
+- **Julia-cuda**: a CUDA implementation parallelized on GPU. The GPU kernels are wrapped in Julia code and functions. This makes use of **CUDA.jl**
+- **python**: a Python implementation, run fully on CPU
+- **matlab**: a vectorized matlab implementation, run fully on CPU
+
+
 ## CPU Demo
 
 This package features CPU based implementations in three different programming languages; C++, Julia, and Python. The purpose is to compare the CPU performance of basic Ising monte carlo simulations. Later, parallelization and GPU performance will be compared between the 3 languages as well.
@@ -16,22 +33,21 @@ Each of the cpu codes are self contained in their respective folders within CUiS
 
 ### C++
 
-To run the C++ code, you must first enter the cpp directory, and compile the C++ code (if not already compiled)
+To run the C++ code, you must first compile it (if not already compiled). Assuming you are in ```CUiSING/```, the following command will build the C++ executable ```Ising``` within the ```cpp/``` directory.
 ```
-cd cpp
-make
+make -C cpp
 ```
 The C++ executable can be run with the following command and the following flags. It can also be called without any flags and the default parameters will be used.
 ```
-./Ising <n_iters> <d> <n> <J> <h>
+./cpp/Ising <n_iters> <d> <n> <J> <h>
 ```
-- n_iters = number of MC iterations (default: 1000)
-- d = spacial dimension, 2 or 3 (default: 2)
-- n = number of spins along single direction (default: 50)
-- J = magnetic interaction strength (default: 1.0)
-- h = external field strength (default: 0.0)
+- **n_iters** = number of MC iterations (default: 1000)
+- **d** = spacial dimension, 2 or 3 (default: 2)
+- **n** = number of spins along single direction (default: 50)
+- **J** = magnetic interaction strength (default: 1.0)
+- **h** = external field strength (default: 0.0)
 
-The energy and magnetization trajectories are stored in ```cpp/output/output.dat``` and plotted in ```cpp/figures/Sys_<n_iter>_<d>_<n>_<J>_<h>/```.
+The energy and magnetization trajectories are stored in ```output/cpp_cpu_output.dat```.
 
 ### Julia
 To run the Julia code, first enter the julia folder

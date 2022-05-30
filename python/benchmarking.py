@@ -48,11 +48,11 @@ J = float(args.J)
 h = float(args.h)
 
 setup = '''
-from Ising import Ising2DVect
+from Ising import Ising2D
 '''
 
 stmt = '''
-model = Ising2DVect(n,J,h,n_iter)
+model = Ising2D(n,J,h,n_iter)
 M,E = model.run()
 '''
 print(f"Program time : {timeit.timeit(setup=setup,stmt=stmt,number=1,globals=globals())} seconds")

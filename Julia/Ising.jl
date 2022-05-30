@@ -28,7 +28,7 @@ function calcHamiltonian(model::Ising2DModel,A)
                        A[mod(n+mod(i,n),n)+1,j]+A[mod(n+mod(i-2,n),n)+1,j])/2.0
         E -= h*A[i,j]
     end
-    return E
+    return E/(2*n^2)
 end 
 
 function calcDeltaHamiltonian(model::Ising2DModel,A,i,j)
@@ -83,7 +83,7 @@ function calcHamiltonian(model::Ising3DModel,A)
                          A[i,j,mod(n+mod(k,n),n)+1]+A[i,j,mod(n+mod(k-2,n),n)+1])/2.0
         E -= h*A[i,j,k]
     end
-    return E
+    return E/(3*n^3)
 end 
 
 function calcDeltaHamiltonian(model::Ising3DModel,A,i,j,k)

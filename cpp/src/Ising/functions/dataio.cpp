@@ -3,7 +3,7 @@
 void Ising::setOutputFileStructure()
 {
     outputDir = "output/";
-    outputFilename = "output.dat";
+    outputFilename = "cpp_cpu_output.dat";
 
     struct stat sb;
     if (stat(outputDir.c_str(), &sb) == -1)

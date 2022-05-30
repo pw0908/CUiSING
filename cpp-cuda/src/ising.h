@@ -16,6 +16,6 @@
 #include "ising2d.cuh"
 #include "ising3d.cuh"
 
-#define THREADS 256
+#define THREADS 128
 
 #endif

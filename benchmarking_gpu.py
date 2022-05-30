@@ -45,13 +45,13 @@ matplotlib.rcParams.update(
 )
 
 
-n = np.logspace(2,2,1).astype(int)
+n = np.unique(2*np.logspace(.5,3.5,60).astype(int))
 n_iters = int(1e3)
 J = 0.1
 h = 0
-d = int(3)
+d = int(2)
 
-pc = "Sam_add"
+pc = "Sam_GPU"
 delim = "_"
 
 figure_root = "benchmarking/"+str(d)+"d/figures/"
@@ -63,31 +63,32 @@ data_name = pc+delim+str(n_iters)+delim+str(J)+delim+str(h)+delim+str(d)+".dat"
 if os.path.exists(data_root+data_name):
     os.remove(data_root+data_name)
 
+num_restarts = 5
 t_cpp = np.zeros(len(n))
 t_julia = np.zeros(len(n))
 t_python = np.zeros(len(n))
 
-setup = '''from Ising import Ising2D,Ising3D'''
-
 for i in pbar(range(len(n))):
-    process_cpp = subprocess.run(["./cpp/Ising",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
-    t_cpp[i] = re.search('Program Time : (.*) seconds', str(process_cpp.stdout)).group(1)
-    process_julia = subprocess.run(["julia Julia/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
-    t_julia[i] = re.search('(.*) seconds', str(process_julia.stdout)).group(1).split("b'")[-1].split()[-1]
-    if d == 2:
-        stmt = '''model = Ising2D(n[i],J,h,n_iters)
-M,E = model.run()'''
-    elif d == 3:
-        stmt = '''model = Ising3D(n[i],J,h,n_iters)
-M,E = model.run()'''
-    t_python[i] = timeit.timeit(setup=setup,stmt=stmt,number=1,globals=globals())
+    for j in range(1,num_restarts+1):
+        process_cpp = subprocess.run(["./cpp-cuda/Ising",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
+        t_cpp[i] += float(re.search('Program Time : (.*) seconds', str(process_cpp.stdout)).group(1))
+    t_cpp[i] /= num_restarts
+#     process_julia = subprocess.run(["julia Julia/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
+#     t_julia[i] = re.search('(.*) seconds', str(process_julia.stdout)).group(1).split("b'")[-1].split()[-1]
+#     if d == 2:
+#         stmt = '''model = Ising2DVect(n[i],J,h,n_iters)
+# M,E = model.run()'''
+#     elif d == 3:
+#         stmt = '''model = Ising3DVect(n[i],J,h,n_iters)
+# M,E = model.run()'''
+#     t_python[i] = timeit.timeit(setup=setup,stmt=stmt,number=1,globals=globals())
     with open(data_root+data_name,'a') as f:
-        f.write(str(n[i])+" "+str(t_cpp[i])+" "+str(t_julia[i])+" "+str(t_python[i])+"\n")
+        f.write(str(n[i])+" "+str(round(t_cpp[i],5))+"\n")
 
 plt.figure(1,tight_layout=True)
 plt.loglog(n,t_cpp,'.b', label = "C++")
-plt.loglog(n,t_julia,'.g', label = "Julia")
-plt.loglog(n,t_python,'.r',label="Python")
+# plt.loglog(n,t_julia,'.g', label = "Julia")
+# plt.loglog(n,t_python,'.r',label="Python")
 plt.xlabel(r'$n$')
 plt.ylabel(r'$t / $s')
 plt.title(rf'{d}D Benchmarks')
@@ -97,5 +98,5 @@ plt.savefig(figure_root+figure_name)
 with open(data_root+data_name,'w',newline='') as f:
     linewriter = csv.writer(f,delimiter=' ', quoting=csv.QUOTE_MINIMAL,dialect='unix')
     for n_, tc, tj, tp in zip(n, t_cpp, t_julia, t_python):
-                contents = [n_,tc,tj,tp]
+                contents = [n_,round(tc,5)]#,tj,tp]
                 linewriter.writerow(contents)

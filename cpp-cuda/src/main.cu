@@ -117,7 +117,7 @@ int main(int argc, char **argv){
     CHECK_CUDA(cudaMemcpy(lattice_h, lattice, round(std::pow(n,d))*sizeof(float), cudaMemcpyDeviceToHost));
 
     /* Output program duration */
-    printf("Total Program Time: %f seconds\n", duration * 1e-6);
+    printf("Total Program Time : %f seconds\n", duration * 1e-6);
 
     
     /* Cleaning up */

@@ -159,7 +159,7 @@ __global__ void cudaCalcHamiltonian2dKernel(signed int *lattice,
     }
 
     if (threadIdx.x == 0)
-        atomicAdd(&E[iter], shmem[0]/(n*n));
+        atomicAdd(&E[iter], shmem[0]/(2*n*n));
 }
 
 
@@ -394,7 +394,7 @@ void print_lattice(signed int *lattice, int n)
 void writeEM(float *E_h, float *M_h, const int n_iters)
 {
     std::ofstream emStream;
-    std::string emFile = "output/output.dat";
+    std::string emFile = "output/cpp_gpu_output.dat";
     emStream.open(emFile.c_str(), std::fstream::out | std::ofstream::trunc);
 
     for (unsigned i = 0; i < n_iters; i++)
