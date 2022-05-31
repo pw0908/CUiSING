@@ -135,7 +135,7 @@ __global__ void cudaCalcHamiltonian3dKernel(signed int *lattice,
     }
 
     if (threadIdx.x == 0)
-        atomicAdd(&E[iter], shmem[0]/(3*n*n*n));
+        atomicAdd(&E[iter], shmem[0]/(3*n*n*n*J));
 }
 
 

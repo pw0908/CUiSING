@@ -19,7 +19,7 @@ class Ising2D(object):
         A = self.A
         N = self.N
         m = self.m
-        return (-1*J*np.sum(A*self.diff_neigh())/2.0 - h*N*m)/(2*N)
+        return (-1*J*np.sum(A*self.diff_neigh())/2.0 - h*N*m)/(2*N*J)
 
     def calcDeltaHamiltonian(self,i,j):
         J = self.J
@@ -73,7 +73,7 @@ class Ising3D(object):
         A = self.A
         N = self.N
         m = self.m
-        return (-1*J*np.sum(A*self.diff_neigh())/2.0 - h*N*m)/(3*N)
+        return (-1*J*np.sum(A*self.diff_neigh())/2.0 - h*N*m)/(3*N*J)
 
     def calcDeltaHamiltonian(self,i,j,k):
         J = self.J

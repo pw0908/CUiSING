@@ -12,6 +12,11 @@ In Markov Chain Monte Carlo (MCMC) a series of moves are attempted, and accepted
 $$M=\frac{1}{N}\sum_i s_i \\[6pt]
 E=H=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
 
+We normalize the energy such that in a fully aligned system, with no external field, the normalized energy is -1. This is useful for testing purposes so that all trajectories that undergo a transition from random to aligned should have a normalized equilibrium energy of -1.
+
+$$\bar E =\frac{2E}{JNz}$$
+
+where $z$ is the coordination number of the lattice (4 in 2d and 6 in 3d)
 
 ## Overview
 
@@ -113,3 +118,11 @@ To run a simulation, run the following command
 ```
 ./cpp-cuda/Ising <n_iters> <d> <n> <J> <h>
 ```
+
+- **n_iters** = number of MC iterations (default: 1000)
+- **d** = spacial dimension, 2 or 3 (default: 2)
+- **n** = number of spins along single direction (default: 100)
+- **J** = magnetic interaction strength (default: 1.0)
+- **h** = external field strength (default: 0.0)
+
+The energy and magnetization trajectories are printed to the file ```output/cpp_gpu_output.dat```. 
