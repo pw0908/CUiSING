@@ -125,4 +125,4 @@ To run a simulation, run the following command
 - **J** = magnetic interaction strength (default: 1.0)
 - **h** = external field strength (default: 0.0)
 
-The energy and magnetization trajectories are printed to the file ```output/cpp_gpu_output.dat```. 
+If no arguments are provided then the default values will be used. The energy and magnetization trajectories are printed to the file ```output/cpp_gpu_output.dat```. 
