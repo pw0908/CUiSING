@@ -1,5 +1,4 @@
 #include "utilities.h"
-#include "../cuda/cuda_header.cuh"
 
 void START_CPU_TIMER(SysInfo::Timers &timers)
 {

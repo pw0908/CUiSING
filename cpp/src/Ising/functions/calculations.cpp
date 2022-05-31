@@ -19,7 +19,7 @@ void Ising::calcHamiltonian2d()
                             A2d[i][j]*h;
         }
     }
-    E[iter] = e/(2*N*J);
+    E[iter] = e/(N*(2.0*J+fabs(h)));
 }
 
 /*
@@ -46,7 +46,7 @@ void Ising::calcHamiltonian3d()
             }
         }
     }
-    E[iter] = e/(3*N*J);
+    E[iter] = e/(N*(3.0*J+fabs(h)));
 }
 
 void Ising::calcDeltaHamiltonian2d(int i, int j)
