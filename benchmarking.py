@@ -72,7 +72,7 @@ setup = '''from Ising import Ising2D,Ising3D'''
 for i in pbar(range(len(n))):
     process_cpp = subprocess.run(["./cpp/Ising",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
     t_cpp[i] = re.search('Program Time : (.*) seconds', str(process_cpp.stdout)).group(1)
-    process_julia = subprocess.run(["julia Julia/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
+    process_julia = subprocess.run(["julia julia/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
     t_julia[i] = re.search('(.*) seconds', str(process_julia.stdout)).group(1).split("b'")[-1].split()[-1]
     if d == 2:
         stmt = '''model = Ising2D(n[i],J,h,n_iters)
