@@ -43,12 +43,13 @@ function MCIsing(model::CUDAIsingModel)
     n_iters = model.n_iters
 
     # Initialize the vectors for storing magnetization and energy
-    ms = zeros(n_iters + 1, 1) 
-    Es = zeros(n_iters + 1, 1)
+    ms = CUDA.zeros(Float64,n_iters + 1) 
+    Es = CUDA.zeros(Float64,n_iters + 1)
 
     lattice, rng, n_blocks = InitialiseIsing(model)
-    ms[1] = calcMagnetisation(model,lattice)
-    Es[1] = calcHamiltonian(model,lattice)
+    calcMagnetisation!(model,lattice, ms, 1)
+    calcHamiltonian!(model,lattice, Es, 1)
+    # println(Es)
 
     for l ∈ 2:n_iters + 1
         # In each MC iteration, attempt to flip all spins, using metropolis
@@ -56,8 +57,8 @@ function MCIsing(model::CUDAIsingModel)
         IsingIter!(model,lattice,rng,n_blocks)
         
         # Calculate observables
-        ms[l] = calcMagnetisation(model, lattice)
-        Es[l] = calcHamiltonian(model, lattice)
+        calcMagnetisation!(model, lattice, ms, l)
+        calcHamiltonian!(model, lattice, Es, l)
     end
     return ms, Es
 end
@@ -80,19 +81,16 @@ function InitialiseIsing(model::CUDAIsing2DModel)
     return lattice, rng, n_blocks
 end
 
-function calcHamiltonian(model::CUDAIsing2DModel,lattice)
-    E = CuArray(Float64[0])
+function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E,iter)
     n = model.n
     n_iters = model.n_iters
     n_threads = model.n_threads
 
     n_blocks = Int64(floor((n^2+n_threads-1)/n_threads))
-    @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcHamiltonian!(model,lattice,E)
-
-    return Array(E)[1]
+    @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcHamiltonianKernel!(model,lattice,E,iter)
 end
 
-function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E)
+function calcHamiltonianKernel!(model::CUDAIsing2DModel,lattice,E,iter)
     n = model.n
     J = model.J
     h = model.h
@@ -131,23 +129,21 @@ function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E)
     end
 
     if threadIdx().x==1
-        CUDA.atomic_add!(pointer(E),s[1]/((J*2+abs(h))*n^2))
+        CUDA.@atomic E[iter] += s[1]/((J*2+abs(h))*n^2)
     end
     return
 end 
 
-function calcMagnetisation(model::CUDAIsing2DModel,lattice)
-    m = CuArray(Float64[0])
+function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m,iter)
     n = model.n
     n_iters = model.n_iters
     n_threads = model.n_threads
 
     n_blocks = Int64(floor((n^2+n_threads-1)/n_threads))
-    @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcMagnetisation!(model,lattice,m)
-    return Array(m)[1]
+    @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcMagnetisationKernel!(model,lattice,m,iter)
 end
 
-function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m)
+function calcMagnetisationKernel!(model::CUDAIsing2DModel,lattice,m,iter)
     n = model.n
     J = model.J
     h = model.h
@@ -177,7 +173,7 @@ function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m)
     end
 
     if threadIdx().x==1
-        CUDA.atomic_add!(pointer(m),s[1]/n^2)
+        CUDA.@atomic m[iter] += s[1]/n^2
     end
     return
 end 

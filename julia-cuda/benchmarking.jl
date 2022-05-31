@@ -3,7 +3,7 @@ import PyPlot; const plt=PyPlot
 
 include("Ising.jl")
 
-n = 100
+n = 1000
 J = 0.1
 h = 0.
 n_iters = 1000
