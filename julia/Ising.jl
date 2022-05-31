@@ -34,14 +34,12 @@ function MCIsing(model::IsingModel)
     
     # Outer loop for MC iterations
     for l ∈ 2:n_iters + 1
-        println(l)
-
         # In each MC iteration, attempt to flip all spins, using metropolis
-        @time IsingIter!(model,A)
+        IsingIter!(model,A)
         
         # Calculate observables
-        @time ms[l] = calcMagnetisation(model,A, N)
-        @time Es[l] = calcHamiltonian(model, A)
+        ms[l] = calcMagnetisation(model,A, N)
+        Es[l] = calcHamiltonian(model, A)
     end
     return ms, Es
 end

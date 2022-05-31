@@ -12,12 +12,15 @@ iter = 1:n_iters+1
 precompile(MCIsing,(CUDAIsing2DParam,))
 model = CUDAIsing2DParam(n, J, h, n_iters,n_threads)
 
+println("GPU:")
+MCIsing(model)
 M, E = @time MCIsing(model)
 
 model = Ising2DParam(n, J, h, n_iters)
+println("CPU:")
 M1,E1 = @time MCIsing(model)
 
 plt.clf()
-plt.plot(iter,E)
-plt.plot(iter,E1)
+plt.plot(iter,M)
+plt.plot(iter,M1)
 plt.savefig("test.png")

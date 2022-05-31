@@ -43,22 +43,23 @@ function MCIsing(model::CUDAIsingModel)
     n_iters = model.n_iters
 
     # Initialize the vectors for storing magnetization and energy
-    ms = zeros(n_iters + 1, 1) 
-    Es = zeros(n_iters + 1, 1)
+    ms = CUDA.zeros(Float64,n_iters + 1) 
+    Es = CUDA.zeros(Float64,n_iters + 1)
 
     lattice, rng, n_blocks = InitialiseIsing(model)
-    ms[1] = calcMagnetisation(model,lattice)
-    Es[1] = calcHamiltonian(model,lattice)
+    calcMagnetisation!(model,lattice, ms, 1)
+    calcHamiltonian!(model,lattice, Es, 1)
+    # println(Es)
 
     for l ∈ 2:n_iters + 1
         # In each MC iteration, attempt to flip all spins, using metropolis
+        # println(l)
         IsingIter!(model,lattice,rng,n_blocks)
         
         # Calculate observables
-        ms[l] = calcMagnetisation(model, lattice)
-        Es[l] = calcHamiltonian(model, lattice)
+        calcMagnetisation!(model, lattice, ms, l)
+        calcHamiltonian!(model, lattice, Es, l)
     end
-
     return ms, Es
 end
 
@@ -80,19 +81,16 @@ function InitialiseIsing(model::CUDAIsing2DModel)
     return lattice, rng, n_blocks
 end
 
-function calcHamiltonian(model::CUDAIsing2DModel,lattice)
-    E = CuArray(Float64[0])
+function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E,iter)
     n = model.n
     n_iters = model.n_iters
     n_threads = model.n_threads
 
     n_blocks = Int64(floor((n^2+n_threads-1)/n_threads))
-    @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcHamiltonian!(model,lattice,E)
-
-    return Array(E)[1]
+    @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcHamiltonianKernel!(model,lattice,E,iter)
 end
 
-function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E)
+function calcHamiltonianKernel!(model::CUDAIsing2DModel,lattice,E,iter)
     n = model.n
     J = model.J
     h = model.h
@@ -102,30 +100,20 @@ function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E)
     tid = threadIdx().x
     start = tid + (blockIdx().x-1)*blockDim().x
     stride = blockDim().x*gridDim().x
-    stop = n^2
+    stop = n^2-1
     s[tid] = 0.0;
 
     for idx ∈ start:stride:stop
-        i = Int64(floor((idx-1) / n))+1
-        j = Int64(mod((idx-1),n))+1
-        sl = lattice[(i-1)*n+(n+(j-2)%n)%n+1]
-        sr = lattice[(i-1)*n+(n+j%n)%n+1]
-        su = lattice[((n+i%n)%n)*n+j]
-        sd = lattice[((n+(i-2)%n)%n)*n+j]
+        @inbounds i = Int64(floor((idx-1) / n))+1
+        @inbounds j = Int64(mod((idx-1),n))+1
+        @inbounds sl = lattice[(i-1)*n+(n+(j-2)%n)%n+1]
+        @inbounds sr = lattice[(i-1)*n+(n+j%n)%n+1]
+        @inbounds su = lattice[(n+i%n)%n*n+j]
+        @inbounds sd = lattice[(n+(i-2)%n)%n*n+j]
 
-        # sl = lattice[i*n+(n+(j-2)%n)%n]
-        # sr = lattice[i*n+(n+j%n)%n]
-        # su = lattice[(n+i%n)%n*n+j]
-        # sd = lattice[(n+(i-2)%n)%n*n+j]
-
-        # sl = lattice[i*n+(n+(j-1)%n)%n]
-        # sr = lattice[i*n+(n+(j+1)%n)%n]
-        # su = lattice[(n+(i+1)%n)%n*n+j]
-        # sd = lattice[(n+(i-1)%n)%n*n+j]
-
-        sum_spins = sl+sr+su+sd
-        sij = lattice[idx]
-        s[tid] -= sij*(J*sum_spins/2+h)
+        @inbounds sum_spins = sl+sr+su+sd
+        @inbounds sij = lattice[idx]
+        @inbounds s[tid] -= sij*(J*sum_spins/2+h)
     end
     sync_threads()
 
@@ -140,23 +128,21 @@ function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E)
     end
 
     if threadIdx().x==1
-        CUDA.atomic_add!(pointer(E),s[1]/((J*2+abs(h))*n^2))
+        CUDA.@atomic E[iter] += s[1]/((J*2+abs(h))*n^2)
     end
     return
 end 
 
-function calcMagnetisation(model::CUDAIsing2DModel,lattice)
-    m = CuArray(Float64[0])
+function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m,iter)
     n = model.n
     n_iters = model.n_iters
     n_threads = model.n_threads
 
     n_blocks = Int64(floor((n^2+n_threads-1)/n_threads))
-    @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcMagnetisation!(model,lattice,m)
-    return Array(m)[1]
+    @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcMagnetisationKernel!(model,lattice,m,iter)
 end
 
-function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m)
+function calcMagnetisationKernel!(model::CUDAIsing2DModel,lattice,m,iter)
     n = model.n
     J = model.J
     h = model.h
@@ -170,7 +156,7 @@ function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m)
     s[tid] = 0.0;
 
     for idx ∈ start:stride:stop
-        s[tid] += lattice[idx]
+        @inbounds s[tid] += lattice[idx]
     end
 
     sync_threads()
@@ -178,7 +164,7 @@ function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m)
     j =  Int64(floor(blockDim().x/2))
 
     while j > 0
-        if tid<j
+        if tid<j+1
             s[tid] += s[tid+j]
         end
         sync_threads()
@@ -186,7 +172,7 @@ function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m)
     end
 
     if threadIdx().x==1
-        CUDA.atomic_add!(pointer(m),s[1]/n^2)
+        CUDA.@atomic m[iter] += s[1]/n^2
     end
     return
 end 
@@ -195,8 +181,8 @@ function IsingIter!(model::CUDAIsing2DModel,lattice,rng, n_blocks)
     n = model.n
     n_threads = model.n_threads
     rands = Random.rand(rng, Float64, n^2)
-    @cuda threads=n_threads blocks=n_blocks IsingIterKernel!(model,0,lattice,rands)
-    @cuda threads=n_threads blocks=n_blocks IsingIterKernel!(model,1,lattice,rands)
+    @cuda threads=n_threads blocks=n_blocks IsingIterKernel!(model,false,lattice,rands)
+    @cuda threads=n_threads blocks=n_blocks IsingIterKernel!(model,true,lattice,rands)
 end
 
 function IsingIterKernel!(model::CUDAIsing2DModel,sublattice,lattice,rands)
@@ -213,16 +199,16 @@ function IsingIterKernel!(model::CUDAIsing2DModel,sublattice,lattice,rands)
         return
     end
 
-    sl = lattice[(i-1)*n+(n+(j-2)%n)%n+1]
-    sr = lattice[(i-1)*n+(n+j%n)%n+1]
-    su = lattice[(n+i%n)%n*n+j]
-    sd = lattice[(n+(i-2)%n)%n*n+j]
+    @inbounds sl = lattice[(i-1)*n+(n+(j-2)%n)%n+1]
+    @inbounds sr = lattice[(i-1)*n+(n+j%n)%n+1]
+    @inbounds su = lattice[(n+i%n)%n*n+j]
+    @inbounds sd = lattice[(n+(i-2)%n)%n*n+j]
 
     sum_spins = sl+sr+su+sd
     s = lattice[tid]
     boltz = exp(-2*s*(sum_spins*J+h))
     if (rands[tid]<=boltz)
-        lattice[tid]=-s
+        @inbounds lattice[tid]=-s
     end
     return
 end
