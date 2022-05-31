@@ -102,17 +102,16 @@ function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E)
     tid = threadIdx().x
     start = tid + (blockIdx().x-1)*blockDim().x
     stride = blockDim().x*gridDim().x
-    stop = n^2-2
+    stop = n^2
     s[tid] = 0.0;
-
 
     for idx ∈ start:stride:stop
         i = Int64(floor((idx-1) / n))+1
         j = Int64(mod((idx-1),n))+1
         sl = lattice[(i-1)*n+(n+(j-2)%n)%n+1]
         sr = lattice[(i-1)*n+(n+j%n)%n+1]
-        su = lattice[(n+i%n)%n*n+j]
-        sd = lattice[(n+(i-2)%n)%n*n+j]
+        su = lattice[((n+i%n)%n)*n+j]
+        sd = lattice[((n+(i-2)%n)%n)*n+j]
 
         # sl = lattice[i*n+(n+(j-2)%n)%n]
         # sr = lattice[i*n+(n+j%n)%n]
@@ -133,7 +132,7 @@ function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E)
     j =  Int64(floor(blockDim().x/2))
 
     while j > 0
-        if tid<j
+        if tid<j+1
             s[tid] += s[tid+j]
         end
         sync_threads()
@@ -167,7 +166,7 @@ function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m)
     tid = threadIdx().x
     start = tid + (blockIdx().x-1)*blockDim().x
     stride = blockDim().x*gridDim().x
-    stop = n^2-1
+    stop = n^2
     s[tid] = 0.0;
 
     for idx ∈ start:stride:stop
@@ -219,7 +218,6 @@ function IsingIterKernel!(model::CUDAIsing2DModel,sublattice,lattice,rands)
     su = lattice[(n+i%n)%n*n+j]
     sd = lattice[(n+(i-2)%n)%n*n+j]
 
-    
     sum_spins = sl+sr+su+sd
     s = lattice[tid]
     boltz = exp(-2*s*(sum_spins*J+h))

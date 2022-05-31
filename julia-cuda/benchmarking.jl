@@ -4,7 +4,7 @@ import PyPlot; const plt=PyPlot
 include("Ising.jl")
 
 n = 100
-J = 0.1
+J = 1.0
 h = 0.
 n_iters = 1000
 n_threads = 256
