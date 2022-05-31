@@ -103,7 +103,6 @@ function calcHamiltonianKernel!(model::CUDAIsing2DModel,lattice,E,iter)
     stop = n^2-1
     s[tid] = 0.0;
 
-
     for idx ∈ start:stride:stop
         @inbounds i = Int64(floor((idx-1) / n))+1
         @inbounds j = Int64(mod((idx-1),n))+1
@@ -153,7 +152,7 @@ function calcMagnetisationKernel!(model::CUDAIsing2DModel,lattice,m,iter)
     tid = threadIdx().x
     start = tid + (blockIdx().x-1)*blockDim().x
     stride = blockDim().x*gridDim().x
-    stop = n^2-1
+    stop = n^2
     s[tid] = 0.0;
 
     for idx ∈ start:stride:stop
@@ -205,7 +204,6 @@ function IsingIterKernel!(model::CUDAIsing2DModel,sublattice,lattice,rands)
     @inbounds su = lattice[(n+i%n)%n*n+j]
     @inbounds sd = lattice[(n+(i-2)%n)%n*n+j]
 
-    
     sum_spins = sl+sr+su+sd
     s = lattice[tid]
     boltz = exp(-2*s*(sum_spins*J+h))

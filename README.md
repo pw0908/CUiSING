@@ -107,7 +107,14 @@ For the GPU port, we only implemented in C++ and Julia, due to time constraints.
 
 ### c++ with CUDA
 
-The C++ CUDA implementation is located the ```cpp-cuda/``` directory. Before running the code must be compiled. Depending on the machine, you may need to make changes to the **makefile**, particularly the **CUDA lib and include paths**, the **nvcc path** and the **CUDA gencodes**. The proper gencodes for each GPU architecture and CUDA version can be found at the following link: https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/.
+The C++ CUDA implementation is located the ```cpp-cuda/``` directory. Within the ```cpu-cuda/src``` directory, there are a number of files:
+- **main.cu**: the main script which reads in user input and execuates the simulation by calling functions
+- **ising.h**: header file to include basic libraries, as well as libraries specific to this project, such as **cuRAND**.
+- **cuda_helper.h**: includes helper functions for checking and interpreting CUDA and cuRAND errors
+- **ising2d.h** and **ising3d.h**: contains declarations of host wrapper functions and cuda kernels for 2d and 3d ising model simulations, respectively.
+- **ising2d.cu** and **ising3d.cu**: contains function and kernel definitions for 2d and 3d ising model simulations, respectively.
+
+Before running any simulations, the code must be compiled. Depending on the machine, you may need to make changes to the **makefile**, particularly the **CUDA lib and include paths**, the **nvcc path** and the **CUDA gencodes**. The proper gencodes for each GPU architecture and CUDA version can be found at the following link: https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/.
 
 To compile the ```cpp-cuda``` code, run the following command from the ```CUiSING/``` directory,
 ```
@@ -125,4 +132,28 @@ To run a simulation, run the following command
 - **J** = magnetic interaction strength (default: 1.0)
 - **h** = external field strength (default: 0.0)
 
-If no arguments are provided then the default values will be used. The energy and magnetization trajectories are printed to the file ```output/cpp_gpu_output.dat```. 
+If no arguments are provided then the default values will be used. The energy and magnetization trajectories are printed to the file ```output/cpp_gpu_output.dat```. These show how the system state evolved over "time".
+
+#### Example for ```cpp-cuda```: Spontaneous Magnetization!
+
+In 2d and 3d, the Ising model is well known for its interesting phase behavior. It turns out, that at high enough interaction strengths, $J$ (and/or low enough temperatures), the system will undergo a spontaneous transition from completely disorded, to ordered without applying any external driving force. In the disordered state, all of the spins are randomly oriented, and therefore in the equilibrium state, the system fluctuates around a net magnetization of 0. However, if $J$ is high enough, then the system will spontaneously order, and the magnetization will become non-zero, as more spins face one direction than the other. Analysis of the partition function using statistical mechanical methods allows us to predict what $J$ needs to be in order for this transition to happen, we call this the critical J, or $J_c$. In 2d, this value is:
+$$
+J_c=\frac{\ln{\left(1+\sqrt{2}\right)}}{2}\approx 0.44
+$$
+We attempt to recover this spontaneouos phase transitions as well as the analytical critical interaction strngth through the use of our GPU based monte carlo simulations.
+
+We ran numerous simulations at different interaction strengths, and extracted the mean magnetization at equilibrium from each one via block averaging. Besides $J$, The system parameters for each simulation remained fixed:
+- $n_{\text{iters}}$ = $1e6$
+- $d$ = $2$
+- $n$ = $200$
+- $h$ = $0$
+
+$J$ was varied between $0.01-1.0$ amongst 40 different simulations. Below we plot the **energy** and **magnetization** trajectories for the 40 simulations, and finally, the plot of $M$ vs $J$,
+
+![Sam Production E vs i](samples/figures/E_vs_i.png)
+![Sam Production M vs i](samples/figures/M_vs_i.png)
+![Sam Production M vs J](samples/figures/M_vs_J.png)
+
+We indeed see exactly what we expected. The energy starts high and decreases until plateuing out at an equilibrium value. The magnetization starts out at 0 (the system is initialized in random configuration), and as the Monte Carlo simulation progresses, either the system stays disordered, or the magnetization grows until reaching an equilibrium value.
+
+We also recover the phase behavior of the 2d Ising Model. The magnetization spontaneously becomes non-zero at $J=J_c\approx 0.44$. This indicates to us the success of our ```cpp-cuda``` code. Not only does it give the correct results, but in a fraction of the time as the CPU would have. This many simulations of systems this large, for this many iterations would take prohibitively long on the CPU alone. Thus, we can see the benefit and necessity of using the GPU for these simulations.
