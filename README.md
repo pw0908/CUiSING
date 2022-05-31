@@ -134,13 +134,25 @@ To run a simulation, run the following command
 
 If no arguments are provided then the default values will be used. The energy and magnetization trajectories are printed to the file ```output/cpp_gpu_output.dat```. These show how the system state evolved over "time".
 
+#### C++ with CUDA Benchmarks
+
+Below we compare the speeds of the ```cpp``` and ```cpp-cuda``` code over a large range of system sizes, in both 2d and 3d. The specifications for the CPU and GPU are:
+- CPU: Intel i9-10850k (4.8 GHz boost clock, 10 cores, 20 threads)
+- GPU: NVIDIA RTX 3080Ti
+  - CUDA Version 11.4
+
+![cpp vs cpp-cuda 2d](benchmarking/2d/figures/cpp_cpp-cuda_comparison.png)
+![cpp vs cpp-cuda 3d](benchmarking/3d/figures/cpp_cpp-cuda_comparison.png)
+
+We can see the incredible performance of the GPU implementation, especially for higher values of $n$. With the GPU code being 2 orders of magnitude faster than the C++ code, which was already the fastest CPU implementation. We do see at very small system sizes that the CPU code performs better, which is expected since there are not very many computations to parallelize. Another attractive feature of the GPU code is that the computation time remains fixed up to a certain system size. Since they are being run in parallel, adding more spins does not increase the computational time until the system becomes too big and then each thread has to handle multiple spins, and at that point, time begins to scale with the system size.
+
 #### Example for ```cpp-cuda```: Spontaneous Magnetization!
 
-In 2d and 3d, the Ising model is well known for its interesting phase behavior. It turns out, that at high enough interaction strengths, $J$ (and/or low enough temperatures), the system will undergo a spontaneous transition from completely disorded, to ordered without applying any external driving force. In the disordered state, all of the spins are randomly oriented, and therefore in the equilibrium state, the system fluctuates around a net magnetization of 0. However, if $J$ is high enough, then the system will spontaneously order, and the magnetization will become non-zero, as more spins face one direction than the other. Analysis of the partition function using statistical mechanical methods allows us to predict what $J$ needs to be in order for this transition to happen, we call this the critical J, or $J_c$. In 2d, this value is:
+In 2d and 3d, the Ising model is well known for its interesting phase behavior. It turns out, that at high enough interaction strengths, $J$ (and/or low enough temperatures), the system will undergo a spontaneous transition from completely disorded to ordered without applying any external driving force ($h=0$). In the disordered state, all of the spins are randomly oriented, and therefore in the equilibrium state, the system fluctuates around a net magnetization of 0. However, if $J$ is high enough, then the system will spontaneously order, and the magnetization will become non-zero, as more spins face one direction than the other. Analysis of the partition function using statistical mechanical methods allows us to predict what $J$ needs to be in order for this transition to happen, we call this the critical $J$, or $J_c$. In 2d, this value is:
 $$
 J_c=\frac{\ln{\left(1+\sqrt{2}\right)}}{2}\approx 0.44
 $$
-We attempt to recover this spontaneouos phase transitions as well as the analytical critical interaction strngth through the use of our GPU based monte carlo simulations.
+We attempt to recover this spontaneouos phase transitions as well as the analytical critical interaction strength through the use of our GPU based MC simulations.
 
 We ran numerous simulations at different interaction strengths, and extracted the mean magnetization at equilibrium from each one via block averaging. Besides $J$, The system parameters for each simulation remained fixed:
 - $n_{\text{iters}}$ = $1e6$
@@ -154,6 +166,6 @@ $J$ was varied between $0.01-1.0$ amongst 40 different simulations. Below we plo
 ![Sam Production M vs i](samples/figures/M_vs_i.png)
 ![Sam Production M vs J](samples/figures/M_vs_J.png)
 
-We indeed see exactly what we expected. The energy starts high and decreases until plateuing out at an equilibrium value. The magnetization starts out at 0 (the system is initialized in random configuration), and as the Monte Carlo simulation progresses, either the system stays disordered, or the magnetization grows until reaching an equilibrium value.
+We indeed see exactly what we expected. The energy starts high and decreases until plateuing out at an equilibrium value. The magnetization starts out at 0 (the system is initialized in random configuration), and as the MC simulation progresses, the system eithers stays disordered ($m=0$), or the magnetization grows until reaching an equilibrium value.
 
-We also recover the phase behavior of the 2d Ising Model. The magnetization spontaneously becomes non-zero at $J=J_c\approx 0.44$. This indicates to us the success of our ```cpp-cuda``` code. Not only does it give the correct results, but in a fraction of the time as the CPU would have. This many simulations of systems this large, for this many iterations would take prohibitively long on the CPU alone. Thus, we can see the benefit and necessity of using the GPU for these simulations.
+We also recover the phase behavior of the 2d Ising Model. The magnetization spontaneously becomes non-zero at $J=J_c\approx 0.44$. This indicates to us the success of our ```cpp-cuda``` code. Not only does it give the correct results, but in a fraction of the time as the CPU would have. Acquiring this plot of $M$ vs $J$ requires many simulations of large systems, run for an extremely large number of iterations. In order to ensure that the system reaches its true equilibrium, we ran for $1e6$ iterations. These calculations would have been extremely time-consuming on the CPU, and likely would have taken many hours or even days,  rather than minutes. Thus, we can see the benefit and necessity of using the GPU for these simulations.
