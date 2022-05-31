@@ -47,11 +47,8 @@ function MCIsing(model::CUDAIsingModel)
     Es = zeros(n_iters + 1, 1)
 
     lattice, rng, n_blocks = InitialiseIsing(model)
-    println(lattice)
     ms[1] = calcMagnetisation(model,lattice)
-    println(ms[1])
     Es[1] = calcHamiltonian(model,lattice)
-
 
     for l ∈ 2:n_iters + 1
         # In each MC iteration, attempt to flip all spins, using metropolis
@@ -110,12 +107,12 @@ function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E)
 
 
     for idx ∈ start:stride:stop
-        i = Int64(floor(idx / n))
-        j = Int64(mod(idx,n))
-        sl = lattice[(i-1)*n+(n+(j-2)%n)%n]
-        sr = lattice[(i-1)*n+(n+j%n)%n]
-        su = lattice[(n+i%n)%n*n+(j-1)]
-        sd = lattice[(n+(i-2)%n)%n*n+(j-1)]
+        i = Int64(floor((idx-1) / n))+1
+        j = Int64(mod((idx-1),n))+1
+        sl = lattice[(i-1)*n+(n+(j-2)%n)%n+1]
+        sr = lattice[(i-1)*n+(n+j%n)%n+1]
+        su = lattice[(n+i%n)%n*n+j]
+        sd = lattice[(n+(i-2)%n)%n*n+j]
 
         # sl = lattice[i*n+(n+(j-2)%n)%n]
         # sr = lattice[i*n+(n+j%n)%n]
@@ -144,7 +141,7 @@ function calcHamiltonian!(model::CUDAIsing2DModel,lattice,E)
     end
 
     if threadIdx().x==1
-        CUDA.atomic_add!(pointer(E),s[1]/n^2)
+        CUDA.atomic_add!(pointer(E),s[1]/((J*2+abs(h))*n^2))
     end
     return
 end 
@@ -173,7 +170,6 @@ function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m)
     stop = n^2-1
     s[tid] = 0.0;
 
-
     for idx ∈ start:stride:stop
         s[tid] += lattice[idx]
     end
@@ -191,7 +187,7 @@ function calcMagnetisation!(model::CUDAIsing2DModel,lattice,m)
     end
 
     if threadIdx().x==1
-        CUDA.atomic_add!(pointer(m),s[1]/n)
+        CUDA.atomic_add!(pointer(m),s[1]/n^2)
     end
     return
 end 
@@ -210,18 +206,19 @@ function IsingIterKernel!(model::CUDAIsing2DModel,sublattice,lattice,rands)
     h = model.h
 
     tid = blockDim().x*(blockIdx().x-1)+threadIdx().x
-    i = Int64(floor(tid / n))
-    j = Int64(mod(tid,n))
+    i = Int64(floor((tid-1) / n))+1
+    j = Int64(mod((tid-1),n))+1
     if tid>=n^2
         return
     elseif ((i-1)%2 != (j-1)%2) != sublattice
         return
     end
 
-    sl = lattice[(i-1)*n+(n+(j-2)%n)%n]
-    sr = lattice[(i-1)*n+(n+j%n)%n]
-    su = lattice[(n+i%n)%n*n+(j-1)]
-    sd = lattice[(n+(i-2)%n)%n*n+(j-1)]
+    sl = lattice[(i-1)*n+(n+(j-2)%n)%n+1]
+    sr = lattice[(i-1)*n+(n+j%n)%n+1]
+    su = lattice[(n+i%n)%n*n+j]
+    sd = lattice[(n+(i-2)%n)%n*n+j]
+
     
     sum_spins = sl+sr+su+sd
     s = lattice[tid]
