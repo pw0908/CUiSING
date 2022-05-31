@@ -50,23 +50,17 @@ The C++ executable can be run with the following command and the following flags
 The energy and magnetization trajectories are stored in ```output/cpp_cpu_output.dat```.
 
 ### Julia
-To run the Julia code, first enter the julia folder
+To run the Julia code from the ```CUiSING/``` directory, run the following command (you must include values for all of the arguments),
 ```
-cd Julia
+julia Julia/benchmarking.jl <n_iters> <d> <n> <J> <h>
 ```
-From within the Julia folder you can run the Julia code with the following command. You must include values for all of the flags.
-```
-julia benchmarking.jl <n_iters> <d> <n> <J> <h>
-```
+The energy and magnetization trajectories are stored in ```output/julia_cpu_output.dat```
 ### Python
-To run the python code you can first enter the python directory,
+To run the Python code from the ```CUiSING/``` directory, run the following command (you must include values for all of the arguments),
 ```
-cd python
+python3 python/benchmarking.py <n_iters> <d> <n> <J> <h>
 ```
-the code can then be run with the following command. You must include values for all of the flag.
-```
-python benchmarking.py <n_iters> <d> <n> <J> <h>
-```
+The energy and magnetization trajectories are stored in ```output/python_cpu_output.dat```. Note that the python code is very slow compared to the C++ and Julia code, so you might need to decrease the system size in order to get an output in a reasonable time.
 
 ### CPU Benchmarking
 Thusfar we have done some work with benchmarking the CPU implementation across different hardware and across the three different languages. The data and figures are stored in ```benchmarking/``` and they are stored by dimension.
@@ -84,15 +78,16 @@ Pierre has also run some benchmarks with similar results both on his PC (Ryzen 5
 ![Pierre ARM 3d benchmarks](benchmarking/3d/figures/Pierre_ARM_1000_0.1_0_3.png)
 Benchmarks of all of the methods can be run simultaneously by using the ```CUiSING/benchmarking.py``` within the ```CUiSING/``` folder. You can change the system and iterative parameters within the python file, and then simply run the following command.
 ```
-python benchmarking.py
+python3 benchmarking.py
 ```
 The span of $n$ to be benchmarked can be set using the logspace command in line 48 of the script.
 ```
 n = np.logspace(low,high,number).astype(int)
 ```
 
-## GPU Implementation
-Coming soon...
+## GPU Implementation Intro/Goals
+
+*This part was submitted with the cpu demo at the midpoint of the project. We have since implemented these things. Read beyond for information and results!*
 
 The C++ code has comments above the functions which will be parallelized on the GPU. We plan to implement the following parallelizations in all languages:
 - Parallelizing the Hamiltonian calculation by parallelizing the calculation of individual spin energies, using a reduction to add them per block, and then using an atomic add to add up the contributions from each block.
@@ -100,3 +95,21 @@ The C++ code has comments above the functions which will be parallelized on the 
 - Lastly, we generate large arrays of random numbers, which can be parallelized on the GPU to generate all of the random numbers at the same time. There are algorithms which can generate arrays in parallel without relying on the system time.
   
 We haven't included comments about parallelization in Julia and python because the structure is the same, and the parallelization will be done in the same way across the languages. The difference willl be in the CUDA interface used, whether it be CUDA (C++), pyCUDA (python), or CUDA.jl (Julia). We will implement the same parallelizations across the three different languages using the available functions, and compare their performance. We suspect that the C++-CUDA code will perform the fastest, however, if the Julia-CUDA.jl implementation is close to the performance of the C++-CUDA code, then a case can be made for using Julia since both the CPU and GPU syntax is extremely simple and easy to pick up.
+
+## GPU Results
+
+For the GPU port, we only implemented in C++ and Julia, due to time constraints. These were the main two languages we wanted to compare as these are both commonly used in scientific computing.
+
+### c++ with CUDA
+
+The C++ CUDA implementation is located the ```cpp-cuda/``` directory. Before running the code must be compiled. Depending on the machine, you may need to make changes to the **makefile**, particularly the **CUDA lib and include paths**, the **nvcc path** and the **CUDA gencodes**. The proper gencodes for each GPU architecture and CUDA version can be found at the following link: https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/.
+
+To compile the ```cpp-cuda``` code, run the following command from the ```CUiSING/``` directory,
+```
+make -C cpp-cuda
+```
+
+To run a simulation, run the following command
+```
+./cpp-cuda/Ising <n_iters> <d> <n> <J> <h>
+```

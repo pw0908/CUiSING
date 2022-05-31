@@ -114,7 +114,6 @@ __global__ void cudaCalcHamiltonian3dKernel(signed int *lattice,
         j = (idx/n)%n;
         k = idx%n;
 
-
         sl = lattice[i*n*n+(n+(j-1)%n)%n*n+k];
         sr = lattice[i*n*n+(n+(j+1)%n)%n*n+k];
         su = lattice[(n+(i+1)%n)%n*n*n+j*n+k];
