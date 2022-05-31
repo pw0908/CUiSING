@@ -9,14 +9,14 @@ where the first sum is over all spins, and their nearest neighbors.
 
 In Markov Chain Monte Carlo (MCMC) a series of moves are attempted, and accepted based on probabilistic criteria to drive the system to the lowest free energy state. In this package, we have implemented the Metropolis-Hastings algorithm which uses the Boltzmann weight from statistical mechanics combined with detailed balance. During the simulation, the spin state will evolve with each iteration, and therefore so will the total energy and magnetization. Detailed balance ensures that the system evolves to the equilibrium state. The energy and magnetization are the main observables of the system, and they are defined as follows,
 
-$$M=\frac{1}{N}\sum_i s_i \\[6pt]
-E=H=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
+$$M=\frac{1}{N}\sum_i s_i$$
+$$E=H=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
 
 We normalize the energy such that in a fully aligned system, with no external field, the normalized energy is -1. This is useful for testing purposes so that all trajectories that undergo a transition from random to aligned should have a normalized equilibrium energy of -1.
 
-$$\bar E =\frac{2E}{JNz}$$
+$$\bar E =\frac{E}{JNz/2+|h|}=\frac{E}{JNd+|h|}$$
 
-where $z$ is the coordination number of the lattice (4 in 2d and 6 in 3d)
+where $z$ is the coordination number of the lattice (4 in 2d and 6 in 3d). In 2d and 3d, we have $d=z/2$.
 
 ## Overview
 
