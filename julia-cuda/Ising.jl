@@ -1,6 +1,6 @@
 include("../julia/Ising.jl")
 
-using CUDA, Random
+using CUDA
 import CUDA; CURAND,CUBLAS
 
 abstract type CUDAIsingModel <: IsingModel end
