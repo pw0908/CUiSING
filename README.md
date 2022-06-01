@@ -19,7 +19,6 @@ $$\bar E =\frac{E}{JNz/2+|h|}=\frac{E}{JNd+|h|}$$
 where $z$ is the coordination number of the lattice (4 in 2d and 6 in 3d). In 2d and 3d, we have $d=z/2$.
 
 ## Overview
-
 This package contains many different implementations in different languages that run the same simulation. The goal of each one is the same, to perform Metropolis Monte Carlo on the 2d and 3d Ising model. The purpose of the different implementations is to show differences in speed among various languages on CPU, and GPU. Here, we list all the available codes with a brief description of each:
 - **cpp**: a c++ implementation, run fully on CPU
 - **cpp-cuda**: a CUDA implementation parallelized on GPU. The GPU kernels are wrapped in C++ code and functions.
@@ -28,6 +27,33 @@ This package contains many different implementations in different languages that
 - **Julia-cuda**: a CUDA implementation parallelized on GPU. The GPU kernels are wrapped in Julia code and functions. This makes use of **CUDA.jl**
 - **python**: a Python implementation, run fully on CPU
 - **matlab**: a vectorized matlab implementation, run fully on CPU
+
+## Installation Instructions
+
+Before getting started, there are some brief installation procedures that need to be followed for the different languages:
+
+#### C++
+The C++ code should be runable with C++ versions $\ge$ 11. No additional libraries need to be downloaded.
+
+#### Julia
+First you must install Julia onto the machine. There is a guide on how to do this for Linux, MacOS, and Windows available in ```tutorial/```. Once Julia is installed, CUDA.jl needs to be added in order to run the GPU code. Install the CUDA package by running the following from the command line,
+```
+julia
+] add CUDA Random LinearAlgebra
+```
+You should now be all set to run the Julia programs.
+
+#### Python
+The python code makes use of ```numpy```. Install it by running the following commands:
+```
+pip install numpy
+```
+
+#### Benchmarking/Wrappers
+Many of the wrappers and benchmarking scripts written in Python make use of additional packages. Install them with the following commands,
+```
+pip3 install matplotlib progressbar csv
+```
 
 
 ## CPU Demo
@@ -96,10 +122,14 @@ n = np.logspace(low,high,number).astype(int)
 
 The C++ code has comments above the functions which will be parallelized on the GPU. We plan to implement the following parallelizations in all languages:
 - Parallelizing the Hamiltonian calculation by parallelizing the calculation of individual spin energies, using a reduction to add them per block, and then using an atomic add to add up the contributions from each block.
-- Parallelizing the Monte Carlo (MC) loop using a checkerboard stencil in which many MC moves can be attempted at once due to the small range of the interactions. Spins that are outside the nearest neighbor cutoff can be flipped simultaneously since their states are independent. This allows us to attempt flipping up to half of the spins at the same time. This will drastically speed up the implementation.
-- Lastly, we generate large arrays of random numbers, which can be parallelized on the GPU to generate all of the random numbers at the same time. There are algorithms which can generate arrays in parallel without relying on the system time.
+- Similarly parallelizing the total magnetization calculation, which is a sum of all spins in the lattice. This can be done with a reduction.
+- Parallelizing the Monte Carlo (MC) loop using a checkerboard stencil in which many MC moves can be attempted at once due to the small range of the interactions. Spins that are outside the nearest neighbor cutoff can be flipped simultaneously since their states are independent. This allows us to attempt flipping up to half of the spins at the same time. This will drastically speed up the implementation. See the image below for an example of the proposed checkerboard for a 6x6 array. In this image, in step 1, all of the black spins would be flipped simultaneously while the white spins are fixed, and then vice versa in step 2. Note that $n$ must be even for this to work with periodic boundary conditions.
+
+![checkerboard](checkerboard.png)
+
+- Lastly, we generate large arrays of random numbers, which can be parallelized on the GPU to generate all of the random numbers at the same time. There are algorithms which can generate arrays in parallel via cuRAND.
   
-We haven't included comments about parallelization in Julia and python because the structure is the same, and the parallelization will be done in the same way across the languages. The difference willl be in the CUDA interface used, whether it be CUDA (C++), pyCUDA (python), or CUDA.jl (Julia). We will implement the same parallelizations across the three different languages using the available functions, and compare their performance. We suspect that the C++-CUDA code will perform the fastest, however, if the Julia-CUDA.jl implementation is close to the performance of the C++-CUDA code, then a case can be made for using Julia since both the CPU and GPU syntax is extremely simple and easy to pick up.
+We haven't included comments about parallelization in Julia because the structure is the same, and the parallelization will be done in the same way across the languages. The difference will be in the CUDA interface used, whether it be CUDA (C++), or CUDA.jl (Julia). We will implement the same parallelizations across the two different languages using the available functions, and compare their performance. We suspect that the C++-CUDA code will perform the fastest, however, if the Julia-CUDA.jl implementation is close to the performance of the C++-CUDA code, then a case can be made for using Julia since both the CPU and GPU syntax is extremely simple and easy to pick up.
 
 ## GPU Results
 
@@ -139,7 +169,8 @@ If no arguments are provided then the default values will be used. The energy an
 Below we compare the speeds of the ```cpp``` and ```cpp-cuda``` code over a large range of system sizes, in both 2d and 3d. The specifications for the CPU and GPU are:
 - CPU: Intel i9-10850k (4.8 GHz boost clock, 10 cores, 20 threads)
 - GPU: NVIDIA RTX 3080Ti
-  - CUDA Version 11.4
+  - CUDA Version 11.6
+  - Driver Version 512.59
 
 ![cpp vs cpp-cuda 2d](benchmarking/2d/figures/cpp_cpp-cuda_comparison.png)
 ![cpp vs cpp-cuda 3d](benchmarking/3d/figures/cpp_cpp-cuda_comparison.png)
@@ -169,3 +200,12 @@ $J$ was varied between $0.01-1.0$ amongst 40 different simulations. Below we plo
 We indeed see exactly what we expected. The energy starts high and decreases until plateuing out at an equilibrium value. The magnetization starts out at 0 (the system is initialized in random configuration), and as the MC simulation progresses, the system eithers stays disordered ($m=0$), or the magnetization grows until reaching an equilibrium value.
 
 We also recover the phase behavior of the 2d Ising Model. The magnetization spontaneously becomes non-zero at $J=J_c\approx 0.44$. This indicates to us the success of our ```cpp-cuda``` code. Not only does it give the correct results, but in a fraction of the time as the CPU would have. Acquiring this plot of $M$ vs $J$ requires many simulations of large systems, run for an extremely large number of iterations. In order to ensure that the system reaches its true equilibrium, we ran for $1e6$ iterations. These calculations would have been extremely time-consuming on the CPU, and likely would have taken many hours or even days,  rather than minutes. Thus, we can see the benefit and necessity of using the GPU for these simulations.
+
+Lastly, we take a look at the lattice itself at different stages throughout the MC simulation, for a system that undergoes spontaneous magnetization.
+
+Beginning:
+![Sam Lattice Beginning](samples/figures/cpp_gpu_lattice_initial.png)
+Middle:
+![Sam Lattice Beginning](samples/figures/cpp_gpu_lattice_intermediate.png)
+End:
+![Sam Lattice Beginning](samples/figures/cpp_gpu_lattice_final.png)

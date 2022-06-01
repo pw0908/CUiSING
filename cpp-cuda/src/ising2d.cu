@@ -357,21 +357,19 @@ void callCalcMagnetization2d(signed int *lattice,
  * */
 void print_lattice(signed int *lattice, int n)
 {
+
+    std::ofstream latticeStream;
+    std::string emFile = "output/cpp_gpu_lattice.dat";
+    latticeStream.open(emFile.c_str(), std::fstream::out | std::ofstream::trunc);
+
+
     for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < n; j++)
         {
-            if (lattice[(i*n+j)] == 1)
-            {
-                std::cout << " " << lattice[(i*n+j)] << " ";
-            }
-            else
-            {
-                std::cout << lattice[(i*n+j)] << " ";
-            }
-            
+            latticeStream << lattice[(i*n+j)] << " ";
         }
-        std::cout << " \n";
+        latticeStream << "\n";
     }
 }
 
@@ -407,5 +405,4 @@ void writeEM(float *E_h, float *M_h, const int n_iters)
         }
         
     }
-
 }
