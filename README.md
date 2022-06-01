@@ -7,7 +7,7 @@ The Ising model is a lattice model in which spins interact via magnetic interact
 $$H(\{\mathbf{s}\})=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
 where the first sum is over all spins, and their nearest neighbors.
 
-In Markov Chain Monte Carlo (MCMC) a series of moves are attempted, and accepted based on probabilistic criteria to drive the system to the lowest free energy state. In this package, we have implemented the Metropolis-Hastings algorithm which uses the Boltzmann weight from statistical mechanics combined with detailed balance. During the simulation, the spin state will evolve with each iteration, and therefore so will the total energy and magnetization. Detailed balance ensures that the system evolves to the equilibrium state. The energy and magnetization are the main observables of the system, and they are defined as follows,
+In Markov Chain Monte Carlo (MCMC) a series of moves are attempted, and accepted based on probabilistic criteria to drive the system to the lowest free energy state. In this package, we have implemented the Metropolis-Hastings algorithm which uses the Boltzmann weight from statistical mechanics combined with detailed balance. During the simulation, the spin state will evolve with each iteration, and, therefore, so will the total energy and magnetization. Detailed balance ensures that the system evolves to the equilibrium state. The energy and magnetization are the main observables of the system, and they are defined as follows,
 
 $$M=\frac{1}{N}\sum_i s_i$$
 $$E=H=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
@@ -19,14 +19,16 @@ $$\bar E =\frac{E}{JNz/2+|h|}=\frac{E}{JNd+|h|}$$
 where $z$ is the coordination number of the lattice (4 in 2d and 6 in 3d). In 2d and 3d, we have $d=z/2$.
 
 ## Overview
-This package contains many different implementations in different languages that run the same simulation. The goal of each one is the same, to perform Metropolis Monte Carlo on the 2d and 3d Ising model. The purpose of the different implementations is to show differences in speed among various languages on CPU, and GPU. Here, we list all the available codes with a brief description of each:
-- **cpp**: a c++ implementation, run fully on CPU
+
+This package contains many different implementations in different languages that run the same simulation. The goal of each one is the same, to perform Metropolis Monte Carlo on the 2d and 3d Ising model. The purpose of the different implementations is to show differences in speed among various languages on CPU and GPU. Here, we list all the available codes with a brief description of each:
+- **cpp**: a C++ implementation, run fully on CPU
 - **cpp-cuda**: a CUDA implementation parallelized on GPU. The GPU kernels are wrapped in C++ code and functions.
   - Requires  cuRAND package, which comes loaded with CUDA
-- **Julia**: a Julia implementation, run fully on CPU
-- **Julia-cuda**: a CUDA implementation parallelized on GPU. The GPU kernels are wrapped in Julia code and functions. This makes use of **CUDA.jl**
+- **julia**: a Julia implementation, run fully on CPU
+- **julia-cuda**: a CUDA implementation parallelized on GPU. The GPU kernels are wrapped in Julia code and functions. This makes use of **CUDA.jl**
 - **python**: a Python implementation, run fully on CPU
 - **matlab**: a vectorized matlab implementation, run fully on CPU
+- **tutorial**: Tutorial for setting up and using Julia, with special emphasis on how to run **CUDA.jl**.
 
 ## Installation Instructions
 
@@ -39,7 +41,7 @@ The C++ code should be runable with C++ versions $\ge$ 11. No additional librari
 First you must install Julia onto the machine. There is a guide on how to do this for Linux, MacOS, and Windows available in ```tutorial/```. Once Julia is installed, CUDA.jl needs to be added in order to run the GPU code. Install the CUDA package by running the following from the command line,
 ```
 julia
-] add CUDA Random LinearAlgebra
+] add CUDA LinearAlgebra
 ```
 You should now be all set to run the Julia programs.
 
@@ -54,7 +56,6 @@ Many of the wrappers and benchmarking scripts written in Python make use of addi
 ```
 pip3 install matplotlib progressbar csv
 ```
-
 
 ## CPU Demo
 
@@ -81,11 +82,25 @@ The C++ executable can be run with the following command and the following flags
 The energy and magnetization trajectories are stored in ```output/cpp_cpu_output.dat```.
 
 ### Julia
-To run the Julia code from the ```CUiSING/``` directory, run the following command (you must include values for all of the arguments),
+To run the Julia code from the ```CUiSING/``` directory, open the Julia REPL and use the following code:
+```julia
+include("julia/Ising.jl")
 ```
-julia Julia/benchmarking.jl <n_iters> <d> <n> <J> <h>
+One can then define the Ising  `model`, depending on the dimension, as:
+```julia
+model = Ising2DParam(n, J, h, n_iters)
 ```
-The energy and magnetization trajectories are stored in ```output/julia_cpu_output.dat```
+To simulate the system, for both 2D and 3D, simply run the following:
+```julia
+ms, Es = MCIsing(model)
+```
+Where `Es` and `ms` are the energy and magnetization, respectively.
+
+From the command line, one can also directly call:
+```
+julia julia/benchmarking.jl <n_iters> <d> <n> <J> <h>
+```
+The energy and magnetization trajectories are stored in ```output/julia_cpu_output.dat```.
 ### Python
 To run the Python code from the ```CUiSING/``` directory, run the following command (you must include values for all of the arguments),
 ```
@@ -101,7 +116,7 @@ The 2d and 3d results as run on Sam's PC (Intel i9-10850k) are given below,
 ![Sam 3d benchmarks](benchmarking/3d/figures/Sam_1000_0.1_0_3.png)
 Note that we do recover the proper $n^d$ scaling as expected without any parallelization. This is because each MC iteration requires a loop over all $n^d$ particles in the system.
 
-Pierre has also run some benchmarks with similar results both on his PC (Ryzen 5900X):
+Pierre has also run some benchmarks with similar results both on his PC (Ryzen 5950X):
 ![Pierre 2d benchmarks](benchmarking/2d/figures/Pierre_1000_0.1_0_2.png)
 ![Pierre 3d benchmarks](benchmarking/3d/figures/Pierre_1000_0.1_0_3.png)
  and his 2022 Macbook Pro (ARM):
@@ -122,21 +137,14 @@ n = np.logspace(low,high,number).astype(int)
 
 The C++ code has comments above the functions which will be parallelized on the GPU. We plan to implement the following parallelizations in all languages:
 - Parallelizing the Hamiltonian calculation by parallelizing the calculation of individual spin energies, using a reduction to add them per block, and then using an atomic add to add up the contributions from each block.
-- Similarly parallelizing the total magnetization calculation, which is a sum of all spins in the lattice. This can be done with a reduction.
-- Parallelizing the Monte Carlo (MC) loop using a checkerboard stencil in which many MC moves can be attempted at once due to the small range of the interactions. Spins that are outside the nearest neighbor cutoff can be flipped simultaneously since their states are independent. This allows us to attempt flipping up to half of the spins at the same time. This will drastically speed up the implementation. See the image below for an example of the proposed checkerboard for a 6x6 array. In this image, in step 1, all of the black spins would be flipped simultaneously while the white spins are fixed, and then vice versa in step 2. Note that $n$ must be even for this to work with periodic boundary conditions.
-
-![checkerboard](checkerboard.png)
-
-- Lastly, we generate large arrays of random numbers, which can be parallelized on the GPU to generate all of the random numbers at the same time. There are algorithms which can generate arrays in parallel via cuRAND.
+- Parallelizing the Monte Carlo (MC) loop using a checkerboard stencil in which many MC moves can be attempted at once due to the small range of the interactions. Spins that are outside the nearest neighbor cutoff can be flipped simultaneously since their states are independent. This allows us to attempt flipping up to half of the spins at the same time. This will drastically speed up the implementation.
+- Lastly, we generate large arrays of random numbers, which can be parallelized on the GPU to generate all of the random numbers at the same time. There are algorithms which can generate arrays in parallel without relying on the system time.
   
-We haven't included comments about parallelization in Julia because the structure is the same, and the parallelization will be done in the same way across the languages. The difference will be in the CUDA interface used, whether it be CUDA (C++), or CUDA.jl (Julia). We will implement the same parallelizations across the two different languages using the available functions, and compare their performance. We suspect that the C++-CUDA code will perform the fastest, however, if the Julia-CUDA.jl implementation is close to the performance of the C++-CUDA code, then a case can be made for using Julia since both the CPU and GPU syntax is extremely simple and easy to pick up.
+We haven't included comments about parallelization in Julia  because the structure is the same, and the parallelization will be done in the same way. The difference willl be in the CUDA interface used, whether it be CUDA (C++) or CUDA.jl (Julia). We suspect that the C++-CUDA code will perform the fastest, however, if the Julia-CUDA.jl implementation is close to the performance of the C++-CUDA code, then a case can be made for using Julia since both the CPU and GPU syntax is extremely simple and easy to pick up.
 
 ## GPU Results
 
-For the GPU port, we only implemented in C++ and Julia, due to time constraints. These were the main two languages we wanted to compare as these are both commonly used in scientific computing.
-
-### c++ with CUDA
-
+### C++ with CUDA
 The C++ CUDA implementation is located the ```cpp-cuda/``` directory. Within the ```cpu-cuda/src``` directory, there are a number of files:
 - **main.cu**: the main script which reads in user input and execuates the simulation by calling functions
 - **ising.h**: header file to include basic libraries, as well as libraries specific to this project, such as **cuRAND**.
@@ -164,13 +172,34 @@ To run a simulation, run the following command
 
 If no arguments are provided then the default values will be used. The energy and magnetization trajectories are printed to the file ```output/cpp_gpu_output.dat```. These show how the system state evolved over "time".
 
+### Julia with CUDA.jl
+The Julia CUDA.jl implementation can be found under `julia-cuda/Ising.jl`, wih. To avoid repetition, code relies in part on other functions defined in `julia/Ising.jl` for the CPU. 
+
+Assuming all the steps mentioned previously (installing CUDA and CUDA.jl), the code should work as given. In order to use this code, from `CUiSING/`, open the Julia REPL and use the following:
+```julia
+include("julia-cuda/Ising.jl")
+```
+As it was for the CPU code, one first needs to construct the Ising `model`:
+```julia
+model = CUDAIsing2DParam(n, J, h, n_iters, n_threads)
+```
+Now we also include the optional argument `n_threads`. To simulate the system, for both 2D and 3D, simply run the following:
+```julia
+ms, Es = MCIsing(model)
+```
+Where `Es` and `ms` are the energy and magnetization, respectively.
+
+From the command line, one can also directly call:
+```
+julia julia-cuda/benchmarking.jl <n_iters> <d> <n> <J> <h>
+```
+The energy and magnetization trajectories are stored in ```output/julia_gpu_output.dat```.
 #### C++ with CUDA Benchmarks
 
 Below we compare the speeds of the ```cpp``` and ```cpp-cuda``` code over a large range of system sizes, in both 2d and 3d. The specifications for the CPU and GPU are:
 - CPU: Intel i9-10850k (4.8 GHz boost clock, 10 cores, 20 threads)
 - GPU: NVIDIA RTX 3080Ti
-  - CUDA Version 11.6
-  - Driver Version 512.59
+  - CUDA Version 11.4
 
 ![cpp vs cpp-cuda 2d](benchmarking/2d/figures/cpp_cpp-cuda_comparison.png)
 ![cpp vs cpp-cuda 3d](benchmarking/3d/figures/cpp_cpp-cuda_comparison.png)

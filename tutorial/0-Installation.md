@@ -41,3 +41,19 @@ user@user-name:~$ julia
 ```
 And you should see the following message:
 ![Julia REPL](assets/repl.png)
+The above is called the Julia REPL and we will perform most computations here.
+
+## Installing Packages
+There are two ways to install packages in Julia. The first is to import `Pkg`:
+```julia
+julia> using Pkg
+julia> Pkg.add("PackageName.jl")
+```
+The alternative is to press the `]` key, at which point `pkg` is loaded automatically and our REPL now resembles:
+```julia
+(@v1.7) pkg>
+```
+Adding a package now simply involves:
+```julia
+(@v1.7) pkg> add PackageName
+```
