@@ -1,26 +1,24 @@
-using PyCall
-import PyPlot; const plt=PyPlot
+using Printf
 
-include("Ising.jl")
-
-n = 100
-J = 1.0
-h = 0.
-n_iters = 1000
+n = parse(Int64, ARGS[3]);
+J = parse(Float64, ARGS[4]); n_iters = parse(Int64, ARGS[1]); h= parse(Float64, ARGS[5]);
+d = parse(Int64, ARGS[2])
 n_threads = 256
 iter = 1:n_iters+1
-precompile(MCIsing,(CUDAIsing2DParam,))
-model = CUDAIsing2DParam(n, J, h, n_iters,n_threads)
+if d == 2
+    precompile(MCIsing,(IsingCUDA2DParam,))
+    model = CUDAIsing2DParam(n, J, h, n_iters, n_threads)
+else
+    precompile(MCIsing,(IsingCUDA3DParam,))
+    model = CUDAIsing3DParam(n, J, h, n_iters, n_threads)
+end
 
-println("GPU:")
-MCIsing(model)
 M, E = @time MCIsing(model)
 
-model = Ising2DParam(n, J, h, n_iters)
-println("CPU:")
-M1,E1 = @time MCIsing(model)
-
-plt.clf()
-plt.plot(iter,M)
-plt.plot(iter,M1)
-plt.savefig("test.png")
+open("output/julia_cpu_output.dat", "w") do f
+    for i = iter
+        if mod(i,10) == 0
+            println(f, i," ",@sprintf("%.5f",E[i])," ", @sprintf("%.5f",M[i]))
+        end
+    end
+end
