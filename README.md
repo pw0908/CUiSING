@@ -193,9 +193,9 @@ We ran numerous simulations at different interaction strengths, and extracted th
 
 $J$ was varied between $0.01-1.0$ amongst 40 different simulations. Below we plot the **energy** and **magnetization** trajectories for the 40 simulations, and finally, the plot of $M$ vs $J$,
 
-![Sam Production E vs i](samples/figures/E_vs_i.png)
-![Sam Production M vs i](samples/figures/M_vs_i.png)
-![Sam Production M vs J](samples/figures/M_vs_J.png)
+![Sam Production E vs i](production_run/figures/E_vs_i.png)
+![Sam Production M vs i](production_run/figures/M_vs_i.png)
+![Sam Production M vs J](production_run/figures/M_vs_J.png)
 
 We indeed see exactly what we expected. The energy starts high and decreases until plateuing out at an equilibrium value. The magnetization starts out at 0 (the system is initialized in random configuration), and as the MC simulation progresses, the system eithers stays disordered ($m=0$), or the magnetization grows until reaching an equilibrium value.
 
@@ -204,8 +204,8 @@ We also recover the phase behavior of the 2d Ising Model. The magnetization spon
 Lastly, we take a look at the lattice itself at different stages throughout the MC simulation, for a system that undergoes spontaneous magnetization.
 
 Beginning:
-![Sam Lattice Beginning](samples/figures/cpp_gpu_lattice_initial.png)
+![Sam Lattice Beginning](production_run/figures/cpp_gpu_lattice_initial.png)
 Middle:
-![Sam Lattice Beginning](samples/figures/cpp_gpu_lattice_intermediate.png)
+![Sam Lattice Beginning](production_run/figures/cpp_gpu_lattice_intermediate.png)
 End:
-![Sam Lattice Beginning](samples/figures/cpp_gpu_lattice_final.png)
+![Sam Lattice Beginning](production_run/figures/cpp_gpu_lattice_final.png)
