@@ -1,3 +1,4 @@
+include("Ising.jl")
 using Printf
 
 n = parse(Int64, ARGS[3]);
