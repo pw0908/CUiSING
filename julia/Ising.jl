@@ -1,4 +1,4 @@
-using LinearAlgebra
+using LinearAlgebra, Random
 
 abstract type IsingModel end
 abstract type Ising2DModel <: IsingModel end
@@ -58,7 +58,7 @@ function InitialiseIsing(model::Ising2DModel)
     n_iters = model.n_iters
     n = model.n
 
-    rng = Xoshiro(Int64(floor(time())))
+    rng = Random.Xoshiro(Int64(floor(time())))
 
     ms = zeros(n_iters + 1, 1) 
     Es = zeros(n_iters + 1, 1)
