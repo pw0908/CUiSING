@@ -116,6 +116,7 @@ int main(int argc, char **argv){
     lattice_h = new signed int [(long long)round(std::pow(n,d))];
     CHECK_CUDA(cudaMemcpy(lattice_h, lattice, round(std::pow(n,d))*sizeof(float), cudaMemcpyDeviceToHost));
 
+    /* Print lattice to file if it is 2d */
     if (d==2)
     {
         print_lattice(lattice_h,n);

@@ -28,7 +28,10 @@ This package contains many different implementations in different languages that
 - **julia-cuda**: a CUDA implementation parallelized on GPU. The GPU kernels are wrapped in Julia code and functions. This makes use of **CUDA.jl**
 - **python**: a Python implementation, run fully on CPU
 - **matlab**: a vectorized matlab implementation, run fully on CPU
+- **benchmarking**: contains benchmarking data for CPU and GPU code.
 - **tutorial**: Tutorial for setting up and using Julia, with special emphasis on how to run **CUDA.jl**.
+- **demos_for_TAs**: folder that contains scripts for running a simple 2 simulation on the GPU in c++ and Julia
+- **production_run**: code for a production level set of simulations to extract the $M$ vs $J$ curve. This was written as a test of how the code fairs in a realistic scientific situation.
 
 ## Installation Instructions
 
@@ -54,7 +57,7 @@ pip install numpy
 #### Benchmarking/Wrappers
 Many of the wrappers and benchmarking scripts written in Python make use of additional packages. Install them with the following commands,
 ```
-pip3 install matplotlib progressbar csv
+pip install matplotlib progressbar csv
 ```
 
 ## CPU Demo
@@ -173,7 +176,7 @@ To run a simulation, run the following command
 If no arguments are provided then the default values will be used. The energy and magnetization trajectories are printed to the file ```output/cpp_gpu_output.dat```. These show how the system state evolved over "time".
 
 ### Julia with CUDA.jl
-The Julia CUDA.jl implementation can be found under `julia-cuda/Ising.jl`, wih. To avoid repetition, code relies in part on other functions defined in `julia/Ising.jl` for the CPU. 
+The Julia CUDA.jl implementation can be found under `julia-cuda/Ising.jl`. To avoid repetition, code relies in part on other functions defined in `julia/Ising.jl` for the CPU. 
 
 Assuming all the steps mentioned previously (installing CUDA and CUDA.jl), the code should work as given. In order to use this code, from `CUiSING/`, open the Julia REPL and use the following:
 ```julia

@@ -39,14 +39,16 @@ matplotlib.rcParams.update(
     }
 )
 
+# Input parameters (d=2 by default here)
 n_iters = int(1e4)
-d = int(2)
-n = 300
+n = 500
 J = 0.5
 h = 0.0
 
-subprocess.run(["./../../cpp-cuda/Ising",str(n_iters), str(d), str(n), str(J), str(h)], capture_output=False)
+# Run the cpp-cuda code with the given parameters
+subprocess.run(["./../../cpp-cuda/Ising",str(n_iters), "2", str(n), str(J), str(h)], capture_output=False)
 
+# Read the Ms and Es data and plot
 file = "output/cpp_gpu_output.dat"
 iters = []
 Es = []
@@ -64,7 +66,7 @@ plt.xlabel("Iters")
 plt.title("Trajectories")
 plt.savefig("figures/trajectories.png",bbox_inches='tight')
 
-
+# Read in the 2d lattice and plot as an image
 cmap = matplotlib.colors.ListedColormap(["black","white"], name='Ising', N=None)
 file = "output/cpp_gpu_lattice.dat"
 A = np.loadtxt(file,dtype=int)
