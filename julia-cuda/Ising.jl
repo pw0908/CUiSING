@@ -184,7 +184,7 @@ function calcMagnetisationKernel!(model::CUDAIsingModel,lattice,m,iter)
     tid = threadIdx().x
     start = tid + (blockIdx().x-1)*blockDim().x
     stride = blockDim().x*gridDim().x
-    stop = N
+    stop = N-1
     s[tid] = 0.0;
 
     for idx ∈ start:stride:stop
