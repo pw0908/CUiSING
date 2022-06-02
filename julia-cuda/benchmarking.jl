@@ -16,10 +16,7 @@ for i in 1:length(n)
     @benchmark MCIsing($model)
     end
     append!(t,mean(T.times)*1e-9)
-    print(t[i])
 end
-
-println(t)
 
 open("benchmarking/2d/data/julia_gpu_output.dat", "w") do f
     for i = 1:length(n)
