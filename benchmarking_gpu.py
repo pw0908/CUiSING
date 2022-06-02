@@ -51,7 +51,7 @@ J = 0.1
 h = 0
 d = int(2)
 
-pc = "Pierre_GPU"
+pc = "Sam_GPU_w_Julia"
 delim = "_"
 
 figure_root = "benchmarking/"+str(d)+"d/figures/"

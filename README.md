@@ -3,7 +3,7 @@ Welcome to CUiSING! A CUDA-parallelised implementation of the Ising model writte
 
 This package was developed as part of the CS 179 course requirement in Caltech.
 
-The Ising model is a lattice model in which spins interact via magnetic interactions, and also interact with an externally applied external field. Spins can be in one of two states, up (+) or down (-). The Hamiltonian for the simple Ising model is,
+The Ising model is a lattice model in which spins interact via magnetic interactions, and also interact with an externally applied magnetic field. Spins can be in one of two states, up (+) or down (-). The Hamiltonian for the simple Ising model is,
 $$H(\{\mathbf{s}\})=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
 where the first sum is over all spins, and their nearest neighbors.
 
@@ -12,7 +12,7 @@ In Markov Chain Monte Carlo (MCMC) a series of moves are attempted, and accepted
 $$M=\frac{1}{N}\sum_i s_i$$
 $$E=H=-\frac{J}{2}\sum_i\sum_j s_i s_j - h\sum_i s_i$$
 
-We normalize the energy such that in a fully aligned system, with no external field, the normalized energy is -1. This is useful for testing purposes so that all trajectories that undergo a transition from random to aligned should have a normalized equilibrium energy of -1.
+We normalize the energy such that in a fully aligned system the normalized energy is -1. This is useful for testing purposes so that all trajectories that undergo a transition from random to aligned should have a normalized equilibrium energy of -1.
 
 $$\bar E =\frac{E}{JNz/2+|h|}=\frac{E}{JNd+|h|}$$
 
@@ -30,7 +30,7 @@ This package contains many different implementations in different languages that
 - **matlab**: a vectorized matlab implementation, run fully on CPU
 - **benchmarking**: contains benchmarking data for CPU and GPU code.
 - **tutorial**: Tutorial for setting up and using Julia, with special emphasis on how to run **CUDA.jl**.
-- **demos_for_TAs**: folder that contains scripts for running a simple 2 simulation on the GPU in c++ and Julia
+- **demos_for_TAs**: folder that contains scripts for running a simple 2d simulation on the GPU in c++ and Julia
 - **production_run**: code for a production level set of simulations to extract the $M$ vs $J$ curve. This was written as a test of how the code fairs in a realistic scientific situation.
 
 ## Installation Instructions
