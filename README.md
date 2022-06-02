@@ -115,8 +115,8 @@ The energy and magnetization trajectories are stored in ```output/python_cpu_out
 Thusfar we have done some work with benchmarking the CPU implementation across different hardware and across the three different languages. The data and figures are stored in ```benchmarking/``` and they are stored by dimension.
 
 The 2d and 3d results as run on Sam's PC (Intel i9-10850k) are given below,
-![Sam 2d benchmarks](benchmarking/2d/figures/Sam_1000_0.1_0_2.png)
-![Sam 3d benchmarks](benchmarking/3d/figures/Sam_1000_0.1_0_3.png)
+![Sam 2d benchmarks](benchmarking/2d/figures/Sam_CPU_1000_0.1_0_2.png)
+![Sam 3d benchmarks](benchmarking/3d/figures/Sam_CPU_1000_0.1_0_3.png)
 Note that we do recover the proper $n^d$ scaling as expected without any parallelization. This is because each MC iteration requires a loop over all $n^d$ particles in the system.
 
 Pierre has also run some benchmarks with similar results both on his PC (Ryzen 5950X):
