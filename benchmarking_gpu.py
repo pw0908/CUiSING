@@ -71,11 +71,14 @@ for i in pbar(range(len(n))):
     for j in range(1,num_restarts+1):
         process_cpp = subprocess.run(["./cpp-cuda/Ising",str(n_iters), str(d), str(n[i]), str(J), str(h)], capture_output=True)
         t_cpp[i] += float(re.search('Program Time : (.*) seconds', str(process_cpp.stdout)).group(1))
-        process_julia = subprocess.run(["julia julia-cuda/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
-        t_julia[i] += float(re.search('(.*) seconds', str(process_julia.stdout)).group(1).split("b'")[-1].split()[-1])
+    process_julia = subprocess.run(["julia julia-cuda/benchmarking.jl "+str(int(n_iters))+" "+str(d)+" "+str(int(n[i]))+" "+str(J)+" "+str(h)], capture_output=True, shell = True)
+    if "ms" in str(process_julia.stdout):
+        t_julia[i] = float(re.search('(.*) ms', str(process_julia.stdout)).group(1).split("b'")[-1].split()[-1])*1e-3
+    else:
+        t_julia[i] = float(re.search('(.*) s', str(process_julia.stdout)).group(1).split("b'")[-1].split()[-1])
+
 
     t_cpp[i] /= num_restarts
-    t_julia[i] /= num_restarts
 
     with open(data_root+data_name,'a') as f:
         f.write(str(n[i])+" "+str(t_cpp[i])+" "+str(t_julia[i])+"\n")

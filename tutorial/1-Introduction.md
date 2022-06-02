@@ -50,10 +50,13 @@ We can see the effect of this:
 julia> x=2
 2
 
+julia> y=[]
+2
+
 julia> square!(x,y)
 4
 
-julia> x
+julia> y
 4
 ```
 It is functions like these that allow Julia to behave more like a compilled language than an interpreted language. Interested readers are recommended to look at information regarding Julia's [_just-in-time_ compiller](https://kipp.ly/blog/jits-intro/). 
