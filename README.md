@@ -37,10 +37,10 @@ This package contains many different implementations in different languages that
 
 Before getting started, there are some brief installation procedures that need to be followed for the different languages:
 
-#### C++
+#### C++ (Sam)
 The C++ code should be runable with C++ versions $\ge$ 11. No additional libraries need to be downloaded.
 
-#### Julia
+#### Julia (Pierre)
 First you must install Julia onto the machine. There is a guide on how to do this for Linux, MacOS, and Windows available in ```tutorial/```. Once Julia is installed, CUDA.jl needs to be added in order to run the GPU code. Install the CUDA package by running the following from the command line,
 ```
 julia
@@ -48,7 +48,7 @@ julia
 ```
 You should now be all set to run the Julia programs.
 
-#### Python
+#### Python (Sam +Pierre)
 The python code makes use of ```numpy```. Install it by running the following commands:
 ```
 pip install numpy
@@ -66,7 +66,7 @@ This package features CPU based implementations in three different programming l
 
 Each of the cpu codes are self contained in their respective folders within CUiSING/. The following sections describe how to run each of the CPU codes.
 
-### C++
+### C++ (Sam)
 
 To run the C++ code, you must first compile it (if not already compiled). Assuming you are in ```CUiSING/```, the following command will build the C++ executable ```Ising``` within the ```cpp/``` directory.
 ```
@@ -84,7 +84,7 @@ The C++ executable can be run with the following command and the following flags
 
 The energy and magnetization trajectories are stored in ```output/cpp_cpu_output.dat```.
 
-### Julia
+### Julia (Pierre)
 To run the Julia code from the ```CUiSING/``` directory, open the Julia REPL and use the following code:
 ```julia
 include("julia/Ising.jl")
@@ -104,19 +104,23 @@ From the command line, one can also directly call:
 julia julia/benchmarking.jl <n_iters> <d> <n> <J> <h>
 ```
 The energy and magnetization trajectories are stored in ```output/julia_cpu_output.dat```.
-### Python
+
+### Python (Sam + Pierre)
 To run the Python code from the ```CUiSING/``` directory, run the following command (you must include values for all of the arguments),
 ```
 python3 python/benchmarking.py <n_iters> <d> <n> <J> <h>
 ```
 The energy and magnetization trajectories are stored in ```output/python_cpu_output.dat```. Note that the python code is very slow compared to the C++ and Julia code, so you might need to decrease the system size in order to get an output in a reasonable time.
 
-### CPU Benchmarking
+### CPU Benchmarking (Sam + Pierre)
 Thusfar we have done some work with benchmarking the CPU implementation across different hardware and across the three different languages. The data and figures are stored in ```benchmarking/``` and they are stored by dimension.
 
 The 2d and 3d results as run on Sam's PC (Intel i9-10850k) are given below,
+
 ![Sam 2d benchmarks](benchmarking/2d/figures/Sam_CPU_1000_0.1_0_2.png)
+
 ![Sam 3d benchmarks](benchmarking/3d/figures/Sam_CPU_1000_0.1_0_3.png)
+
 Note that we do recover the proper $n^d$ scaling as expected without any parallelization. This is because each MC iteration requires a loop over all $n^d$ particles in the system.
 
 Pierre has also run some benchmarks with similar results both on his PC (Ryzen 5950X):
@@ -147,7 +151,7 @@ We haven't included comments about parallelization in Julia  because the structu
 
 ## GPU Results
 
-### C++ with CUDA
+### C++ with CUDA (Sam)
 The C++ CUDA implementation is located the ```cpp-cuda/``` directory. Within the ```cpu-cuda/src``` directory, there are a number of files:
 - **main.cu**: the main script which reads in user input and execuates the simulation by calling functions
 - **ising.h**: header file to include basic libraries, as well as libraries specific to this project, such as **cuRAND**.
@@ -175,7 +179,7 @@ To run a simulation, run the following command
 
 If no arguments are provided then the default values will be used. The energy and magnetization trajectories are printed to the file ```output/cpp_gpu_output.dat```. These show how the system state evolved over "time".
 
-### Julia with CUDA.jl
+### Julia with CUDA.jl (Pierre)
 The Julia CUDA.jl implementation can be found under `julia-cuda/Ising.jl`. To avoid repetition, code relies in part on other functions defined in `julia/Ising.jl` for the CPU. 
 
 Assuming all the steps mentioned previously (installing CUDA and CUDA.jl), the code should work as given. In order to use this code, from `CUiSING/`, open the Julia REPL and use the following:
@@ -197,7 +201,7 @@ From the command line, one can also directly call:
 julia julia-cuda/benchmarking.jl <n_iters> <d> <n> <J> <h>
 ```
 The energy and magnetization trajectories are stored in ```output/julia_gpu_output.dat```.
-#### C++ with CUDA Benchmarks
+#### C++ with CUDA Benchmarks (Sam)
 
 Below we compare the speeds of the ```cpp``` and ```cpp-cuda``` code over a large range of system sizes, in both 2d and 3d. The specifications for the CPU and GPU are:
 - CPU: Intel i9-10850k (4.8 GHz boost clock, 10 cores, 20 threads)
@@ -209,7 +213,7 @@ Below we compare the speeds of the ```cpp``` and ```cpp-cuda``` code over a larg
 
 We can see the incredible performance of the GPU implementation, especially for higher values of $n$. With the GPU code being 2 orders of magnitude faster than the C++ code, which was already the fastest CPU implementation. We do see at very small system sizes that the CPU code performs better, which is expected since there are not very many computations to parallelize. Another attractive feature of the GPU code is that the computation time remains fixed up to a certain system size. Since they are being run in parallel, adding more spins does not increase the computational time until the system becomes too big and then each thread has to handle multiple spins, and at that point, time begins to scale with the system size.
 
-#### Example for ```cpp-cuda```: Spontaneous Magnetization!
+#### Example for ```cpp-cuda```: Spontaneous Magnetization! (Sam)
 
 In 2d and 3d, the Ising model is well known for its interesting phase behavior. It turns out, that at high enough interaction strengths, $J$ (and/or low enough temperatures), the system will undergo a spontaneous transition from completely disorded to ordered without applying any external driving force ($h=0$). In the disordered state, all of the spins are randomly oriented, and therefore in the equilibrium state, the system fluctuates around a net magnetization of 0. However, if $J$ is high enough, then the system will spontaneously order, and the magnetization will become non-zero, as more spins face one direction than the other. Analysis of the partition function using statistical mechanical methods allows us to predict what $J$ needs to be in order for this transition to happen, we call this the critical $J$, or $J_c$. In 2d, this value is:
 $$
@@ -241,3 +245,20 @@ Middle:
 ![Sam Lattice Beginning](production_run/figures/cpp_gpu_lattice_intermediate.png)
 End:
 ![Sam Lattice Beginning](production_run/figures/cpp_gpu_lattice_final.png)
+
+#### cpp-cuda TA Demo: Simple 2d Simulation on GPU (Sam)
+I have prepared a simple script for running a 2d simulation on the GPU using the cpp-cuda code. To run the simulation, you should do the following,starting from ```CUiSING/```:
+```
+make -C cpp-cuda
+cd demos_for_TAs/cpp-cuda
+```
+Change the parameters withing ```ising_mc_demo_2d.py``` as you wish. I restrict this demo to 2d so that the lattice can be easily plotted/visualized. Then run the simulation with the following:
+```
+python ising_mc_demo_2d.py
+```
+The trajectory and lattice data are stored in ```demos_for_TAs/output/```. Figures showing the trajectories and the final lattice are stored in ```demos_for_TAs/figures```. Examples are shown below,
+
+![Sam TA Demo Traj](demos_for_TAs/cpp-cuda/figures/trajectories.png)
+![Sam TA Demo Latt](demos_for_TAs/cpp-cuda/figures/lattice.png)
+
+#### julia-cuda TA Demo: Simple 2d Simulation on GPU (Pierre)
