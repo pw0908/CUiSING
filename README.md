@@ -273,3 +273,18 @@ The figures from the simulation will be generated in `demos_for_TAs/julia_cuda/f
 ![Pierre TA Demo Latt](demos_for_TAs/julia_cuda/figures/lattice.png)
 
 ## Comparison between CPU and GPU, C++ and Julia
+When setting out on this project, we wanted to compare two aspects: 1. the CPU and GPU implementations of the Ising Monte Carlo Simulation and 2. The C++ and Julia implementations of these codes. This comparison can be summarised in the figure below:
+![Pierre CPU GPU benchmark](benchmarking/2d/figures/Pierre_gpu_cpu_comparison.png)
+The above figure was generated for the 2D system using Pierre's PC with the following configurations (256 threads were used):
+* CPU: AMD Ryzen 3950X
+* GPU: MSi GEFORCE RTX 3070 Ti
+
+As we can see from the figure, for small system sizes, the GPU implementation can be slower than the CPU implementation. This is unsurprising as the system is currently too small to benefit from parallelisation. However, for these small system sizes, the computational time is effectively constant where, for sizes approaching approximately $n=20$, the GPU code becomes faster than the CPU. 
+
+It isn't until we reach orders of magnitude comparable to our number of threads that we finally begin to recover the expected $n^2$ trend. In this region, the GPU code is 1-2 orders of magnitude faster than the CPU, highlighting the incredible speed up from the techniques described earlier. 
+
+Comparing both the Julia and C++ implementation, it should come to no surprise that the C++ implementation is faster, both for the CPU and GPU. The difference between the two languages is less appreciable in the CPU compared to the GPU; this possibly relates to how CUDA.jl interfaces with the GPU, leading to larger overhead (which is a general issue with Julia). In the GPU, the difference between the two languages is approximately a factor of 2. However, it is worth considering that the Julia code only required approximately half the number of lines of code as the C++ equivalent and it is, as an interpreted language, arguably, easier to read. This highlights the balance between computational speed and conciseness and, based on the graphs above, it is a tough judgement call as to which language is 'better' to use.
+
+In terms of improvements, there are some easy ones related to the formulation of the problem. For example, rather than calculating the magnetisation and energy every iteration, one could simply calculate the energy and magnetisation change and add this to the value of the previous iteration. This could reduce the computational cost substantially. However, for the GPU, the 'checkerboard' strategy may be more-difficult to implement as all the energy changes are computed at once. 
+
+On the Julia side, many of CUDA.jl's high-level features were used, rather than the low-level functions which directly interface with CUDA. This could bring the Julia code much closer to C++ in terms of computational time, at the loss of Julia's nice, concise code.
