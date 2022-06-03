@@ -41,7 +41,7 @@ matplotlib.rcParams.update(
 
 # Input parameters (d=2 by default here)
 n_iters = int(1e4)
-n = 500
+n = 300
 J = 0.5
 h = 0.0
 
@@ -64,6 +64,7 @@ plt.plot(iters,Es,'-k',label=r"$E$")
 plt.plot(iters,Ms,'-r',label=r"$M$")
 plt.xlabel("Iters")
 plt.title("Trajectories")
+plt.legend(loc='best')
 plt.savefig("figures/trajectories.png",bbox_inches='tight')
 
 # Read in the 2d lattice and plot as an image
