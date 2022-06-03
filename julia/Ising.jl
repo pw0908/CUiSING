@@ -163,7 +163,7 @@ end
     Inputs:
         - model::Ising2DModel: The 2D Ising model
         - lattice: 2D array representing the spins in the lattice
-        - Random number generator used in the Metropolis algorithms
+        - rng: Random number generator used in the Metropolis algorithms
 """
 function IsingIter!(model::Ising2DModel,lattice,rng)
     n = model.n
@@ -260,7 +260,7 @@ end
     Inputs:
         - model::Ising3DModel: The 3D Ising model
         - lattice: 3D array representing the spins in the lattice
-        - Random number generator used in the Metropolis algorithms
+        - rng: Random number generator used in the Metropolis algorithms
 """
 function IsingIter!(model::Ising3DModel,lattice,rng)
     n = model.n

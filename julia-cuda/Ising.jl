@@ -64,7 +64,17 @@ function InitialiseIsing(model::CUDAIsingModel)
     device_synchronize()
     return lattice, rng, ms, Es
 end
+"""
+    init_lattice!(model::CUDAIsingModel,lattice,rands)
 
+    The kernel for initialising the Ising model in CUDA.
+
+    Inputs:
+        - model::CUDAIsingModel: The CUDA Ising model 
+        - lattice: CuArray representing the spins in the lattice
+        - rands: The previously-generated random numbers which 
+          determine the spin in the lattice
+"""
 function init_lattice!(model::CUDAIsingModel,lattice,rands)
     N = model.N
     tid = blockDim().x*(blockIdx().x-1) + threadIdx().x
@@ -80,7 +90,7 @@ function init_lattice!(model::CUDAIsingModel,lattice,rands)
     return
 end
 """
-    calcHamiltonian!(model::CUDAIsinModel,lattice,E,iter)
+    calcHamiltonian!(model::CUDAIsingModel,lattice,E,iter)
 
     Calculates the total Energy for a lattice at a given iteration. 
     Places output in E[iter]. CUDA implementation.
@@ -99,7 +109,19 @@ function calcHamiltonian!(model::CUDAIsingModel,lattice,E,iter)
     n_blocks = Int64(floor((N+n_threads-1)/n_threads))
     @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcHamiltonianKernel!(model,lattice,E,iter)
 end
+"""
+    calcHamiltonianKernel!(model::CUDAIsing2DModel,lattice,E,iter)
 
+    The kernel for calculating the total Energy for a 2D lattice at a 
+    given iteration. Places output in E[iter]. CUDA implementation using 
+    index reduction.
+
+    Inputs:
+        - model::CUDAIsing2DModel: The 2D CUDA Ising model
+        - lattice: CuArray array representing the spins in the 2D lattice
+        - E: Vector containing the total energy at all iterations
+        - iter: Iteration at which we are computing the total energy
+"""
 function calcHamiltonianKernel!(model::CUDAIsing2DModel,lattice,E,iter)
     n = model.n
     J = model.J
@@ -141,7 +163,19 @@ function calcHamiltonianKernel!(model::CUDAIsing2DModel,lattice,E,iter)
     end
     return
 end 
+"""
+    calcHamiltonianKernel!(model::CUDAIsing3DModel,lattice,E,iter)
 
+    The kernel for calculating the total Energy for a 3D lattice at a 
+    given iteration. Places output in E[iter]. CUDA implementation using 
+    index reduction.
+
+    Inputs:
+        - model::CUDAIsing3DModel: The 3D CUDA Ising model
+        - lattice: CuArray array representing the spins in the 3D lattice
+        - E: Vector containing the total energy at all iterations
+        - iter: Iteration at which we are computing the total energy
+"""
 function calcHamiltonianKernel!(model::CUDAIsing3DModel,lattice,E,iter)
     n = model.n
     J = model.J
@@ -188,7 +222,7 @@ function calcHamiltonianKernel!(model::CUDAIsing3DModel,lattice,E,iter)
     return
 end
 """
-    calcMagnetisation!(model::CUDAIsinModel,lattice,m,iter)
+    calcMagnetisation!(model::CUDAIsingModel,lattice,m,iter)
 
     Calculates the net Magnetisation for a lattice at a given iteration. 
     Places output in m[iter]. CUDA implementation.
@@ -207,7 +241,19 @@ function calcMagnetisation!(model::CUDAIsingModel,lattice,m,iter)
     n_blocks = Int64(floor((N+n_threads-1)/n_threads))
     @cuda threads=n_threads blocks=n_blocks shmem=n_threads*sizeof(Float64) calcMagnetisationKernel!(model,lattice,m,iter)
 end
+"""
+    calcMagnetisationKernel!(model::CUDAIsing2DModel,lattice,m,iter)
 
+    The kernel for calculating the net Magnetisation for a lattice at a 
+    given iteration. Places output in m[iter]. CUDA implementation using 
+    index reduction.
+
+    Inputs:
+        - model::CUDAIsingModel: The CUDA Ising model
+        - lattice: CuArray array representing the spins in the 3D lattice
+        - m: Vector containing the net magnetisation at all iterations
+        - iter: Iteration at which we are computing the total energy
+"""
 function calcMagnetisationKernel!(model::CUDAIsingModel,lattice,m,iter)
     N = model.N
     J = model.J
@@ -242,7 +288,18 @@ function calcMagnetisationKernel!(model::CUDAIsingModel,lattice,m,iter)
     end
     return
 end 
+"""
+    IsingIter!(model::CUDAIsingModel,lattice,rng)
 
+    Executes a single iteration of the Metropolis Monte Carlo algorithm.
+    Uses the 'checkerboard' method to flip spins which are independent 
+    of each other simultaneously.
+
+    Inputs:
+        - model::CUDAIsingModel: The CUDA Ising model
+        - lattice: CuArray representing the spins in the lattice
+        - rng: Random number generator used in the Metropolis algorithms
+"""
 function IsingIter!(model::CUDAIsingModel,lattice,rng)
     N = model.N
     n_threads = model.n_threads
@@ -252,7 +309,19 @@ function IsingIter!(model::CUDAIsingModel,lattice,rng)
     @cuda threads=n_threads blocks=n_blocks IsingIterKernel!(model,false,lattice,rands)
     @cuda threads=n_threads blocks=n_blocks IsingIterKernel!(model,true,lattice,rands)
 end
+"""
+    IsingIterKernel!(model::CUDAIsing2DModel,sublattice,lattice,rands)
 
+    The kernel to perform the Metropolis Monte Carlo algorithm for the flip of a single
+    spin in a 2D lattice. 
+
+    Inputs:
+        - model::CUDAIsing2DModel: The 2D Ising model
+        - sublattice: Integer representing which spins we are flipping 
+          (even or odd).
+        - lattice: CuArray representing the spins in the 2D lattice
+        - rng: Random number generator used in the Metropolis algorithms
+"""
 function IsingIterKernel!(model::CUDAIsing2DModel,sublattice,lattice,rands)
     n = model.n
     J = model.J 
@@ -280,7 +349,19 @@ function IsingIterKernel!(model::CUDAIsing2DModel,sublattice,lattice,rands)
     end
     return
 end
+"""
+    IsingIterKernel!(model::CUDAIsing3DModel,sublattice,lattice,rands)
 
+    The kernel to perform the Metropolis Monte Carlo algorithm for the flip of a single
+    spin in a 3D lattice. 
+
+    Inputs:
+        - model::CUDAIsing3DModel: The 3D Ising model
+        - sublattice: Integer representing which spins we are flipping 
+          (even or odd).
+        - lattice: CuArray representing the spins in the 3D lattice
+        - rng: Random number generator used in the Metropolis algorithms
+"""
 function IsingIterKernel!(model::CUDAIsing3DModel,sublattice,lattice,rands)
     n = model.n
     J = model.J 
