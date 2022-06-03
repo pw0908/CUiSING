@@ -12,9 +12,9 @@ format="png"
 include("../../julia-cuda/Ising.jl")
 
 # Input parameters (d=2 by default here)
-n_iters = Int64(1e5)
+n_iters = Int64(1e4)
 n_threads = 256
-n = 500
+n = 300
 J = 0.5
 h = 0.0
 
@@ -23,14 +23,22 @@ model = CUDAIsing2DParam(n,J,h,n_iters,n_threads)
 # model = Ising2DParam(n,J,h,n_iters)
 
 # Run the cpp-cuda code with the given parameters
-Ms,Es = MCIsing(model)
+Ms, Es, lattice = MCIsing(model)
 iters = 1:n_iters+1
+lattice = reshape(lattice, n, n)
 
 
-plt.figure(1)
+plt.figure(1,tight_layout=true)
 plt.clf()
 plt.plot(iters,Es,"-k",label="E")
 plt.plot(iters,Ms,"-r",label="M")
 plt.xlabel("Iters")
 plt.title("Trajectories")
 plt.savefig("./figures/trajectories.png",bbox_inches="tight")
+
+plt.figure(2,tight_layout=true)
+plt.clf()
+plt.title("Lattice")
+plt.imshow(lattice,cmap="gray")
+plt.colorbar(ticks=[-1,1])
+plt.savefig("./figures/lattice.png",bbox_inches="tight")

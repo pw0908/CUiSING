@@ -13,12 +13,12 @@ else
     model = Ising3DParam(n, J, h, n_iters)
 end
 
-M, E = @time MCIsing(model)
+M, E, lattice = @time MCIsing(model)
 
-open("output/julia_cpu_output.dat", "w") do f
-    for i = iter
-        if mod(i,10) == 0
-            println(f, i," ",@sprintf("%.5f",E[i])," ", @sprintf("%.5f",M[i]))
-        end
-    end
-end
+# open("output/julia_cpu_output.dat", "w") do f
+#     for i = iter
+#         if mod(i,10) == 0
+#             println(f, i," ",@sprintf("%.5f",E[i])," ", @sprintf("%.5f",M[i]))
+#         end
+#     end
+# end

@@ -30,7 +30,7 @@ This package contains many different implementations in different languages that
 - **matlab**: a vectorized matlab implementation, run fully on CPU
 - **benchmarking**: contains benchmarking data for CPU and GPU code.
 - **tutorial**: Tutorial for setting up and using Julia, with special emphasis on how to run **CUDA.jl**.
-- **demos_for_TAs**: folder that contains scripts for running a simple 2d simulation on the GPU in c++ and Julia
+- **demos_for_TAs**: folder that contains scripts for running a simple 2d simulation on the GPU in C++ and Julia
 - **production_run**: code for a production level set of simulations to extract the $M$ vs $J$ curve. This was written as a test of how the code fairs in a realistic scientific situation.
 
 ## Installation Instructions
@@ -262,3 +262,14 @@ The trajectory and lattice data are stored in ```demos_for_TAs/output/```. Figur
 ![Sam TA Demo Latt](demos_for_TAs/cpp-cuda/figures/lattice.png)
 
 #### julia-cuda TA Demo: Simple 2d Simulation on GPU (Pierre)
+Similarly, an example simulation in Julia using CUDA has been provided in `demos_for_TAs/julia_cuda/ising_mc_demo_2d.jl`. No compilation will be needed as this is all handled by Julia.
+
+One can alter the parameters within `ising_mc_demo_2d.jl` to simulate different systems if so desired. To run it from the `CUiSING/` directory, simply open the Julia REPL and run the following:
+```julia
+include("demos_for_TAs/julia_cuda/ising_mc_demo_2d.jl")
+```
+The figures from the simulation will be generated in `demos_for_TAs/julia_cuda/figures`. Examples are shown below:
+![Pierre TA Demo Traj](demos_for_TAs/julia_cuda/figures/trajectories.png)
+![Pierre TA Demo Latt](demos_for_TAs/julia_cuda/figures/lattice.png)
+
+## Comparison between CPU and GPU, C++ and Julia

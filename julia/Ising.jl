@@ -28,6 +28,19 @@ struct Ising3DParam <: Ising3DModel
     end
 end 
 
+
+"""
+    MCIsing(model::IsingModel)
+
+    Runs the whole monte carlo simulation for all Ising models.
+
+    Inputs:
+        - model::IsingModel: Any Ising model 
+    Outputs:
+        - ms: Net magnetisation at each iteration
+        - Es: Total energy at each iteration
+        - lattice: An array representing the spins in the lattice
+"""
 function MCIsing(model::IsingModel)
     n_iters = model.n_iters
 
@@ -47,13 +60,39 @@ function MCIsing(model::IsingModel)
         calcMagnetisation!(model, lattice, ms, l)
         calcHamiltonian!(model, lattice, Es, l)
     end
-    return ms, Es
+    return ms, Es, lattice
 end
+
+"""
+    calcMagnetisation!(model::IsingModel,lattice,m,iter)
+
+    Calculates the net Magnetisation for a lattice at a 
+    given iteration. Places output in m[iter].
+
+    Inputs:
+        - model::Ising2DModel: The Ising model (2D and 3D)
+        - lattice: 2D or 3D array representing the spins in the lattice
+        - m: Vector containing the net magnetisation at all iterations
+        - iter: Iteration at which we are computing the net magnetisation
+"""
 
 function calcMagnetisation!(model::IsingModel,lattice,m,iter)
     m[iter] = sum(lattice) / model.N
 end
 
+"""
+    InitialiseIsing(model::Ising2DModel)
+
+    Initialise the Ising model for a 2D lattice.
+
+    Inputs:
+        - model::Ising2DModel: The 2D Ising model 
+    Outputs:
+        - lattice: 2D array representing the spins in the lattice
+        - rng: Random number generator used in the Metropolis algorithms
+        - ms: Net magnetisation at each iteration
+        - Es: Total energy at each iteration
+"""
 function InitialiseIsing(model::Ising2DModel)
     n_iters = model.n_iters
     n = model.n
@@ -65,6 +104,18 @@ function InitialiseIsing(model::Ising2DModel)
     return 1 .- 2 * rand([0, 1], (n,n)), rng, ms, Es
 end
 
+"""
+    calcHamiltonian!(model::Ising2DModel,lattice,E,iter)
+
+    Calculates the total Energy for a 2D lattice at a 
+    given iteration. Places output in E[iter].
+
+    Inputs:
+        - model::Ising2DModel: The 2D Ising model
+        - lattice: 2D array representing the spins in the lattice
+        - E: Vector containing the total energy at all iterations
+        - iter: Iteration at which we are computing the total energy
+"""
 function calcHamiltonian!(model::Ising2DModel,lattice,E,iter)
     Es = 0.
     n = model.n
@@ -78,6 +129,20 @@ function calcHamiltonian!(model::Ising2DModel,lattice,E,iter)
     E[iter] = Es/((J*2+abs(h))*n^2)
 end 
 
+"""
+    calcDeltaHamiltonian(model::Ising2DModel,lattice,i,j)
+
+    Calculates the Energy change in a 2D lattice when a spin at [i,j] 
+    is flipped. Places output in E[iter].
+
+    Inputs:
+        - model::Ising2DModel: The 2D Ising model
+        - lattice: 2D array representing the spins in the lattice
+        - i: x-coordinate of the spin being flipped
+        - j: y-coordinate of the spin being flipped
+    Output:
+        - dE: Energy change when a spin at [i,j] is flipped
+"""
 function calcDeltaHamiltonian(model::Ising2DModel,lattice,i,j)
     n = model.n
     J = model.J
@@ -87,6 +152,19 @@ function calcDeltaHamiltonian(model::Ising2DModel,lattice,i,j)
                           lattice[i,j]*h)
 end
 
+"""
+    IsingIter!(model::Ising2DModel,lattice,rng)
+
+    Executes a single iteration of the Metropolis Monte Carlo algorithm.
+    Obtains the energy change for flipping each spin in the lattice, 
+    evaluates the probability and determines whether or not to accept the
+    change.
+
+    Inputs:
+        - model::Ising2DModel: The 2D Ising model
+        - lattice: 2D array representing the spins in the lattice
+        - Random number generator used in the Metropolis algorithms
+"""
 function IsingIter!(model::Ising2DModel,lattice,rng)
     n = model.n
     for i ∈ 1:n, j ∈ 1:n
@@ -97,6 +175,19 @@ function IsingIter!(model::Ising2DModel,lattice,rng)
     end
 end
 
+"""
+    InitialiseIsing(model::Ising3DModel)
+
+    Initialise the Ising model for a 3D lattice.
+
+    Inputs:
+        - model::Ising3DModel: The 3D Ising model 
+    Outputs:
+        - lattice: 3D array representing the spins in the lattice
+        - rng: Random number generator used in the Metropolis algorithms
+        - ms: Net magnetisation at each iteration
+        - Es: Total energy at each iteration
+"""
 function InitialiseIsing(model::Ising3DModel)
     n_iters = model.n_iters
     n = model.n
@@ -108,6 +199,18 @@ function InitialiseIsing(model::Ising3DModel)
     return 1 .- 2 * rand([0, 1], (n,n,n)), rng, ms, Es
 end
 
+"""
+    calcHamiltonian!(model::Ising3DModel,lattice,E,iter)
+
+    Calculates the total Energy for a 3D lattice at a 
+    given iteration. Places output in E[iter].
+
+    Inputs:
+        - model::Ising3DModel: The 3D Ising model
+        - lattice: 3D array representing the spins in the lattice
+        - E: Vector containing the total energy at all iterations
+        - iter: Iteration at which we are computing the total energy
+"""
 function calcHamiltonian(model::Ising3DModel,lattice)
     E = 0.
     n = model.n
@@ -122,6 +225,21 @@ function calcHamiltonian(model::Ising3DModel,lattice)
     return E/((J*3+abs(h))*n^3)
 end 
 
+"""
+    calcDeltaHamiltonian(model::Ising2DModel,lattice,i,j)
+
+    Calculates the Energy change in a 3D lattice when a spin at [i,j,k] 
+    is flipped. Places output in E[iter].
+
+    Inputs:
+        - model::Ising3DModel: The 3D Ising model
+        - lattice: 3D array representing the spins in the lattice
+        - i: x-coordinate of the spin being flipped
+        - j: y-coordinate of the spin being flipped
+        - k: z-coordinate of the spin being flipped
+    Output:
+        - dE: Energy change when a spin at [i,j,k] is flipped
+"""
 function calcDeltaHamiltonian(model::Ising3DModel,lattice,i,j,k)
     n = model.n
     J = model.J
@@ -131,7 +249,19 @@ function calcDeltaHamiltonian(model::Ising3DModel,lattice,i,j,k)
                             lattice[i,j,mod((n+mod(k,n)),n)+1]+lattice[i,j,mod((n+mod(k-2,n)),n)+1])+
                             lattice[i,j,k]*h)
 end
+"""
+    IsingIter!(model::Ising3DModel,lattice,rng)
 
+    Executes a single iteration of the Metropolis Monte Carlo algorithm.
+    Obtains the energy change for flipping each spin in the lattice, 
+    evaluates the probability and determines whether or not to accept the
+    change.
+
+    Inputs:
+        - model::Ising3DModel: The 3D Ising model
+        - lattice: 3D array representing the spins in the lattice
+        - Random number generator used in the Metropolis algorithms
+"""
 function IsingIter!(model::Ising3DModel,lattice,rng)
     n = model.n
     for i ∈ 1:n, j ∈ 1:n, k ∈ 1:n

@@ -32,7 +32,19 @@ struct CUDAIsing3DParam <: CUDAIsing3DModel
         return new(n,J,h,n_iters,n_threads,n^3)
     end
 end 
+"""
+    InitialiseIsing(model::CUDAIsingModel)
 
+    Initialise the Ising model for a CUDA lattice.
+
+    Inputs:
+        - model::CUDAIsingModel: The CUDA Ising model 
+    Outputs:
+        - lattice: CuArray representing the spins in the lattice
+        - rng: Random number generator used in the Metropolis algorithms
+        - ms: Net magnetisation at each iteration
+        - Es: Total energy at each iteration
+"""
 function InitialiseIsing(model::CUDAIsingModel)
     N = model.N
     n_iters = model.n_iters
@@ -67,7 +79,18 @@ function init_lattice!(model::CUDAIsingModel,lattice,rands)
     end
     return
 end
+"""
+    calcHamiltonian!(model::CUDAIsinModel,lattice,E,iter)
 
+    Calculates the total Energy for a lattice at a given iteration. 
+    Places output in E[iter]. CUDA implementation.
+
+    Inputs:
+        - model::CUDAIsingModel: The CUDA Ising model
+        - lattice: CuArray array representing the spins in the lattice
+        - E: Vector containing the total energy at all iterations
+        - iter: Iteration at which we are computing the total energy
+"""
 function calcHamiltonian!(model::CUDAIsingModel,lattice,E,iter)
     N = model.N
     n_iters = model.n_iters
@@ -164,7 +187,18 @@ function calcHamiltonianKernel!(model::CUDAIsing3DModel,lattice,E,iter)
     end
     return
 end
+"""
+    calcMagnetisation!(model::CUDAIsinModel,lattice,m,iter)
 
+    Calculates the net Magnetisation for a lattice at a given iteration. 
+    Places output in m[iter]. CUDA implementation.
+
+    Inputs:
+        - model::CUDAIsingModel: The CUDA Ising model
+        - lattice: CuArray array representing the spins in the lattice
+        - m: Vector containing the net magnetisation at all iterations
+        - iter: Iteration at which we are computing the net magnetisation
+"""
 function calcMagnetisation!(model::CUDAIsingModel,lattice,m,iter)
     N = model.N
     n_iters = model.n_iters
